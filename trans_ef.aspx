@@ -1200,7 +1200,7 @@
 		</script>
 		<style type="text/css">
             #dmain {
-                overflow: hidden;
+                overflow:visible;
             }
             .dview {
                 float: left;
