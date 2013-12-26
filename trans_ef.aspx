@@ -677,6 +677,7 @@
                             opacity : 0
                         });
                         _btnModi();
+                        tranorde.lock();
                         trans.refresh();
                         trans.checkData();
                         $('#txtDatea').focus();
@@ -1015,6 +1016,7 @@
                     q_gtnoa(q_name, replaceAll(q_getPara('sys.key_trans') + (t_date.length == 0 ? q_date() : t_date), '/', ''));
                 else
                     wrServer(t_noa);
+                tranorde.unlock();
             }
             function wrServer(key_value) {
                 var i;
@@ -1099,6 +1101,7 @@
 
             function btnCancel() {
                 _btnCancel();
+                tranorde.unlock();
             }
 
             function FormatNumber(n) {
@@ -1225,6 +1228,7 @@
                 /*margin: -1px;
                  border: 1px black solid;*/
                 border-radius: 5px;
+                overflow: visible;
             }
             .tbbm {
                 padding: 0px;
@@ -1378,10 +1382,10 @@
 					</tr>
 				</table>
 			</div>
-			<div class="dbbm">
-				<div id="tranorde" style="float:left;width:1500px;"></div>
-				<div id="tranorde_control" style="width:950px;"></div>
-				<table class="tbbm"  id="tbbm">
+			<div class="dbbm" style="width:1600px;">
+				<div id="tranorde" style="float:left;width:1600px;"></div>
+				<div id="tranorde_control" style="float:left;width:1600px;"></div>
+				<table class="tbbm"  id="tbbm"  style="float:left;width:950px;">
 					<tr style="height:1px;">
 						<td></td>
 						<td></td>
