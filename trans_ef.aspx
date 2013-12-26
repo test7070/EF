@@ -156,9 +156,9 @@
                     $('#txtTolls').attr('readonly', 'readonly').css('color', 'green').css('background', 'rgb(237,237,237)');
                     $('#cmbCalctype').attr('disabled', 'disabled');
                     $('#cmbCarteamno').attr('disabled', 'disabled');
-                    if ($('#txtOrdeno').val().length > 0) {
+                    /*if ($('#txtOrdeno').val().length > 0) {
                         //轉來的一律不可改日期
-                    } else {
+                    } else {*/
                         var t_tranno = $.trim($('#txtNoa').val());
                         var t_trannoq = $.trim($('#txtNoq').val());
                         var t_datea = $.trim($('#txtDatea').val());
@@ -168,7 +168,7 @@
                             //檢查是否已立帳
                             q_gt('view_trds', "where=^^ tranno='" + t_tranno + "' and trannoq='" + t_trannoq + "' ^^", 0, 0, 0, 'checkTrd_' + t_tranno + '_' + t_trannoq + '_' + t_datea, r_accy);
                         }
-                    }
+                   // }
                 }
             };
             trans = new transData();
@@ -179,7 +179,7 @@
 
             tranorde.prototype = {
                 data : null,
-                tbCount : 10,
+                tbCount : 5,
                 curPage : -1,
                 totPage : 0,
                 curIndex : '',
@@ -354,6 +354,9 @@
                     this.refresh();
                 },
                 refresh : function() {
+                    if(this.data==undefined || this.data.length==0){
+                        return;
+                    }
                     //頁面更新
                     var n = (this.curPage - 1) * this.tbCount;
                     for (var i = 0; i < this.tbCount; i++) {
@@ -416,6 +419,8 @@
                             $('#txtComp').val(this.data[n+i]['comp']);
                             $('#txtNick').val(this.data[n+i]['nick']);
                             $('#txtMemo').val(this.data[n+i]['memo']);
+                            $('#txtUccno').val(this.data[n+i]['productno']);
+                            $('#txtProduct').val(this.data[n+i]['product']);
                         }
                     }
                 },
@@ -424,7 +429,7 @@
                     if (ordeno.length == 0)
                         return;
                     var t_where = "where=^^ noa='" + ordeno + "'^^";
-                    q_gt('view_tranorde', t_where, 0, 0, 0, 'ddd_' + ordeno + '_' + sel, r_accy);
+                    q_gt('view_tranorde_ef', t_where, 0, 0, 0, 'ddd_' + ordeno + '_' + sel, r_accy);
                 },
                 loadcaddr : function(ordeno) {
                     this.curCaddr = new Array();
@@ -433,7 +438,7 @@
                     if (ordeno.length == 0)
                         return;
                     var t_where = "where=^^ noa='" + ordeno + "'^^";
-                    q_gt('view_tranorde', t_where, 0, 0, 0, 'loadcaddr', r_accy);
+                    q_gt('view_tranorde_ef', t_where, 0, 0, 0, 'loadcaddr', r_accy);
                 }
             };
             tranorde = new tranorde();
@@ -550,7 +555,7 @@
                     	t_where += (t_where.length>0?' and ':'') + "len(isnull(port2,''))>0";	
                     t_where="where=^^"+t_where+"^^";
                     Lock();
-                    q_gt('view_tranorde', t_where, 0, 0, 0,'aaa', r_accy);
+                    q_gt('view_tranorde_ef', t_where, 0, 0, 0,'aaa', r_accy);
                 });    
                 //自動載入訂單
                 $('#btnTranorde_refresh').click(); 
@@ -595,7 +600,7 @@
             function q_gtPost(t_name) {
                 switch (t_name) {
                 	case 'aaa':
-                        var GG = _q_appendData("view_tranorde", "", true);
+                        var GG = _q_appendData("view_tranorde_ef", "", true);
                         if (GG[0] != undefined)
                             tranorde.init(GG);
                         else{
@@ -648,11 +653,11 @@
                     case 'btnDele':
                         var as = _q_appendData("trans", "", true);
                         if (as[0] != undefined) {
-                            if (as[0].ordeno.length > 0) {
+                           /* if (as[0].ordeno.length > 0) {
                                 alert('轉來的單據禁止刪除。');
                                 Unlock(1);
                                 return;
-                            }
+                            }*/
                             q_gt('view_trds', "where=^^ tranno='" + $('#txtNoa').val() + "' and trannoq='" + $('#txtNoq').val() + "' ^^", 0, 0, 0, 'isTrd', r_accy);
                         } else {
                             alert('資料異常。');
@@ -660,13 +665,13 @@
                         break;
                     case 'btnModi':
                         var as = _q_appendData("trans", "", true);
-                        if (as[0] != undefined) {
+                        /*if (as[0] != undefined) {
                             if (as[0].ordeno.length > 0) {
                                 alert('轉來的單據禁止修改。');
                                 Unlock(1);
                                 return;
                             }
-                        }
+                        }*/
                         Unlock(1);
                         Lock(1, {
                             opacity : 0
@@ -821,6 +826,41 @@
                             }
                             sum();
                             Unlock(1);
+                        }else if(t_name.substring(0,3)=='bbb'){ 
+                            //計算已派數量,並更新頁面顯示資料
+                            var t_noa = t_name.split('_')[1];
+                            var t_ordeno = t_name.split('_')[2];
+                            var t_mount = parseFloat(t_name.split('_')[3]);
+                            var GG = _q_appendData("view_tranorde_ef", "", true);
+                            if (GG[0] != undefined){
+                                t_vccecount = (GG[0]['vccecount']==undefined?"0":GG[0]['vccecount']);
+                                t_vccecount = (t_vccecount.length==0?"0":t_vccecount);
+                                t_where=" noa='"+t_noa+"'";
+                                t_where="where=^^"+t_where+"^^";
+                                q_gt('trans', t_where, 0, 0, 0, "ccc_"+t_noa+"_"+t_ordeno+"_"+t_mount+"_"+t_vccecount, r_accy);             
+                            }else{
+                                //查無訂單,直接存檔
+                                SaveData();
+                            }                           
+                        }else if(t_name.substring(0,3)=='ccc'){
+                            //回寫已收數量
+                            var t_noa = t_name.split('_')[1];
+                            var t_ordeno = t_name.split('_')[2];
+                            var t_mount = parseFloat(t_name.split('_')[3]);
+                            var t_vccecount = parseFloat(t_name.split('_')[4]);
+                            var t_curVccecount = t_vccecount + t_mount;
+                            var GG = _q_appendData("trans", "", true);
+                            if (GG[0] != undefined){            
+                                t_curVccecount -= parseFloat(GG[0]['mount']==undefined?"0":GG[0]['mount']);
+                            }
+                            for(var i in tranorde.data){
+                                if(tranorde.data[i]['noa']==t_ordeno){
+                                    tranorde.data[i]['vccecount'] = ''+t_curVccecount;
+                                    break;
+                                }
+                            }
+                            tranorde.refresh();
+                            SaveData();
                         }
                         break;
                 }
@@ -860,12 +900,14 @@
             }
 
             function btnIns() {
-                Lock(1, {
+               /* Lock(1, {
                     opacity : 0
-                });
-                curData.copy();
+                });*/
+               // curData.copy();
+                tranorde.lock();
                 _btnIns();
-                curData.paste();
+               // curData.paste();
+                tranorde.paste(); 
                 $('#txtNoa').val('AUTO');
                 $('#txtNoq').val('001');
                 if ($('#cmbCalctype').val().length == 0) {
@@ -883,15 +925,15 @@
                 if (q_chkClose())
                     return;
                 //避免資料不同步
-                if ($.trim($('#txtOrdeno').val()).length > 0) {
+               /* if ($.trim($('#txtOrdeno').val()).length > 0) {
                     alert('轉來的單據禁止修改。');
-                } else {
+                } else {*/
                     Lock(1, {
                         opacity : 0
                     });
                     t_where = " where=^^ noa='" + $('#txtNoa').val() + "'^^";
                     q_gt('trans', t_where, 0, 0, 0, "btnModi", r_accy);
-                }
+                //}
             }
 
             function btnPrint() {
@@ -901,6 +943,10 @@
             function q_stPost() {
                 if (!(q_cur == 1 || q_cur == 2))
                     return false;
+                if(tranorde.data==undefined){
+                    $('#btnTranorde_refresh').click(); 
+                    return;
+                }
                 Unlock(1);
             }
 
@@ -954,6 +1000,15 @@
                 } else {
                     alert("error: btnok!");
                 }
+                
+                t_noa = $.trim($('#txtNoa').val());
+                t_ordeno = $.trim($('#txtOrdeno').val());
+                t_mount = $.trim($('#txtMount').val()).length ==0 ? '0':$.trim($('#txtMount').val());
+                t_where = "noa='"+t_ordeno+"'";
+                t_where="where=^^"+t_where+"^^";
+                q_gt('view_tranorde_ef', t_where, 0, 0, 0, "bbb_"+t_noa+"_"+t_ordeno+"_"+t_mount, r_accy);
+            }
+            function SaveData(){
                 var t_noa = trim($('#txtNoa').val());
                 var t_date = trim($('#txtDatea').val());
                 if (q_cur == 1)
@@ -961,7 +1016,6 @@
                 else
                     wrServer(t_noa);
             }
-
             function wrServer(key_value) {
                 var i;
                 $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val(key_value);
@@ -1032,15 +1086,15 @@
             function btnDele() {
                 if (q_chkClose())
                     return;
-                if ($.trim($('#txtOrdeno').val()).length > 0) {
+               /* if ($.trim($('#txtOrdeno').val()).length > 0) {
                     alert('轉來的單據禁止刪除。');
-                } else {
+                } else {*/
                     Lock(1, {
                         opacity : 0
                     });
                     var t_where = " where=^^ noa='" + $('#txtNoa').val() + "'^^";
                     q_gt('trans', t_where, 0, 0, 0, 'btnDele', r_accy);
-                }
+                //}
             }
 
             function btnCancel() {
@@ -1289,6 +1343,7 @@
 						<td align="center" style="width:80px; color:black;"><a id="vewCarno"> </a></td>
 						<td align="center" style="width:80px; color:black;"><a id="vewDriver"> </a></td>
 						<td align="center" style="width:80px; color:black;"><a id="vewNick"> </a></td>
+						<td align="center" style="width:40px; color:black;"><a id="vewFill"> </a></td>
 						<td align="center" style="width:120px; color:black;"><a id="vewStraddr"> </a></td>
 						<td align="center" style="width:60px; color:black;"><a id="vewMount"> </a></td>
 						<td align="center" style="width:60px; color:black;"><a id="vewPrice"> </a></td>
@@ -1309,6 +1364,7 @@
 						<td id="carno" style="text-align: center;">~carno</td>
 						<td id="driver" style="text-align: center;">~driver</td>
 						<td id="nick" style="text-align: center;">~nick</td>
+						<td id="fill" style="text-align: center;">~fill</td>
 						<td id="straddr" style="text-align: center;">~straddr</td>
 						<td id="mount" style="text-align: right;">~mount</td>
 						<td id="price" style="text-align: right;">~price</td>
@@ -1471,6 +1527,8 @@
 						</td>
 						<td><span> </span><a id="lblCasetype" class="lbl"> </a></td>
 						<td><select id="cmbCasetype" class="txt c1"></select></td>
+						<td><span> </span><a id="lblFill" class="lbl"> </a></td>
+                        <td><input id="txtFill" type="text"  class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblPo" class="lbl"> </a></td>
