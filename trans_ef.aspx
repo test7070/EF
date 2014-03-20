@@ -938,7 +938,7 @@
             }
 
             function btnPrint() {
-                q_box('z_trans.aspx' + "?;;;;" + r_accy, '', "95%", "95%", q_getMsg("popPrint"));
+                q_box('z_tran_ef.aspx' + "?;;;;" + r_accy, '', "95%", "95%", q_getMsg("popPrint"));
             }
 
             function q_stPost() {
@@ -1406,12 +1406,12 @@
 						<td>
 						<input id="txtTrandate"  type="text" class="txt c1"/>
 						</td>
-						<td><span> </span><a id="lblMon" class="lbl"> </a></td>
-						<td>
+						<td style="display:none;"><span> </span><a id="lblMon" class="lbl"> </a></td>
+						<td style="display:none;">
 						<input id="txtMon"  type="text" class="txt c1"/>
 						</td>
-						<td><span> </span><a id="lblMon2" class="lbl"> </a></td>
-						<td>
+						<td style="display:none;"><span> </span><a id="lblMon2" class="lbl"> </a></td>
+						<td style="display:none;">
 						<input id="txtMon2"  type="text" class="txt c1"/>
 						</td>
 					</tr>
@@ -1496,12 +1496,12 @@
 						<td>
 						<input id="txtPton2"  type="text" class="txt c1 num"/>
 						</td>
-						<td><span> </span><a id="lblTolls" class="lbl"> </a></td>
-						<td>
+						<td style="display:none;"><span> </span><a id="lblTolls" class="lbl"> </a></td>
+						<td style="display:none;">
 						<input id="txtTolls"  type="text" class="txt c1 num"/>
 						</td>
-						<td><span> </span><a id="lblReserve" class="lbl"> </a></td>
-						<td>
+						<td style="display:none;"><span> </span><a id="lblReserve" class="lbl"> </a></td>
+						<td style="display:none;">
 						<input id="txtReserve"  type="text" class="txt c1 num"/>
 						</td>
 					</tr>
