@@ -354,7 +354,7 @@
             function _btnSeek() {
                 if (q_cur > 0 && q_cur < 4)
                     return;
-                q_box('trd_tb_s.aspx', q_name + '_s', "600px", "530px", q_getMsg("popSeek"));
+                q_box('trd_ef_s.aspx', q_name + '_s', "600px", "530px", q_getMsg("popSeek"));
             }
             function bbsAssign() {
                 for (var j = 0; j < q_bbsCount; j++) {
@@ -393,7 +393,7 @@
                 q_gt('umms', t_where, 0, 0, 0, 'btnModi', r_accy);
             }
             function btnPrint() {
-                q_box('z_trd_tb.aspx' + "?;;;;" + r_accy + ";noa=" + trim($('#txtNoa').val()), '', "95%", "95%", q_getMsg("popPrint"));
+                q_box('z_trd_ef.aspx' + "?;;;;" + r_accy + ";noa=" + trim($('#txtNoa').val()), '', "95%", "95%", q_getMsg("popPrint"));
             }
             function wrServer(key_value) {
                 var i;
