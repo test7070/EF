@@ -605,7 +605,7 @@
                             tranorde.init(GG);
                         else{
                         	Unlock();
-                        	alert('無資料。');
+                        	//alert('訂單無資料。');
                         }
                         break;
                     case 'isTre':
@@ -726,7 +726,8 @@
                         for ( i = 0; i < as.length; i++) {
                             t_item = t_item + (t_item.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].team;
                         }
-                        q_cmbParse("cmbCarteamno", t_item);
+                        if(t_item.length>0)
+                            q_cmbParse("cmbCarteamno", t_item);
                         if (abbm[q_recno] != undefined)
                             $("#cmbCarteamno").val(abbm[q_recno].carteamno);
                         q_gt('calctype2', '', 0, 0, 0, 'transInit_2');
@@ -744,7 +745,8 @@
                                 isoutside : as[i].isoutside.length == 0 ? false : (as[i].isoutside == "false" || as[i].isoutside == "0" || as[i].isoutside == "undefined" ? false : true)
                             });
                         }
-                        q_cmbParse("cmbCalctype", t_item);
+                        if(t_item.length>0)
+                            q_cmbParse("cmbCalctype", t_item);
                         if (abbm[q_recno] != undefined)
                             $("#cmbCalctype").val(abbm[q_recno].calctype);
                         trans.isInit = true;
@@ -1383,8 +1385,8 @@
 				</table>
 			</div>
 			<div class="dbbm" style="width:1600px;">
-				<div id="tranorde" style="float:left;width:1600px;"></div>
-				<div id="tranorde_control" style="float:left;width:1600px;"></div>
+				<div id="tranorde" style="float:left;width:1600px;display:none;"></div>
+				<div id="tranorde_control" style="float:left;width:1600px;display:none;"></div>
 				<table class="tbbm"  id="tbbm"  style="float:left;width:950px;">
 					<tr style="height:1px;">
 						<td></td>
