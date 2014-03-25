@@ -118,6 +118,10 @@
                         type : '8',
                         name : 'xcalctype',
                         value : t_calctypes.split(',')
+                    }, {/*13-[19]明細*/
+                        type : '8',
+                        name : 'xdetail',
+                        value : ['detail@明細']
                     }]
                 });
                 q_popAssign();
@@ -137,7 +141,8 @@
                 $('#chkXcarteam').children('input').attr('checked', 'checked');
                 $('#chkXcalctype').children('input').attr('checked', 'checked');
                 
-                $('#txtXmon').mask('999/99');
+                $('#txtXmon1').mask('999/99');
+                $('#txtXmon2').mask('999/99');
                 $('#textMon').mask('999/99');
                 
                 $('#btnTrans_sum').click(function(e) {
