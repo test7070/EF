@@ -38,7 +38,9 @@
                 ,['txtDriverno', 'lblDriver', 'driver', 'noa,namea', 'txtDriverno,txtDriver', 'driver_b.aspx']
                 ,['txtCarno', 'lblCarno', 'car2', 'a.noa,driver,driverno', 'txtCarno,txtDriver,txtDriverno', 'car2_b.aspx']
                 ,['txtBoatno', 'lblBoat', 'boat', 'noa,boat', 'txtBoatno,txtBoat', 'boat_b.aspx']
-                ,['txtCardealno', '', 'cardeal', 'noa,comp', 'txtCardealno', 'cardeal_b.aspx']);
+                ,['txtCardealno', '', 'cardeal', 'noa,comp', 'txtCardealno', 'cardeal_b.aspx']
+                ,['txtSaddr', '', 'view_road', 'memo', '0txtSaddr', 'road_b.aspx']
+                ,['txtAaddr', '', 'view_road', 'memo', '0txtAaddr', 'road_b.aspx']);
            
             function sum() {
                 if(q_cur!=1 && q_cur!=2)
