@@ -20,8 +20,8 @@
             }
 
             var q_name = "trans";
-            var q_readonly = ['txtNoa','txtOrdeno','txtWorker','txtWorker2','txtTotal','txtTotal2'];
-            var bbmNum = [['txtInmount',10,3,1],['txtPton',10,3,1],['txtPrice',10,3,1],['txtTotal',10,0,1],['txtPrice2',10,3,1],['txtPrice3',10,3,1],['txtTotal2',10,0,1]];
+            var q_readonly = ['txtNoa','txtOrdeno','txtWorker','txtWorker2'];
+            var bbmNum = [['txtInmount',10,0,1],['txtPton',10,0,1],['txtPrice',10,0,1],['txtPrice2',10,0,1]];
             var bbmMask = [];
             q_sqlCount = 6;
             brwCount = 6;
@@ -60,10 +60,12 @@
             currentData.prototype = {
                 data : [],
                 /*新增時複製的欄位*/
-                include : ['txtDatea', 'txtTrandate','txtCarno','txtDriverno','txtDriver'
+                include : [],
+                
+                /*['txtDatea', 'txtTrandate','txtCarno','txtDriverno','txtDriver'
                     ,'txtCustno','txtComp','txtNick','cmbCalctype','cmbCarteamno','txtStraddrno','txtStraddr','txtEndaddrno','txtEndaddr'
                     ,'txtUccno','txtProduct','txtInmount'
-                    ,'txtOutmount','txtPo','txtCustorde'],
+                    ,'txtOutmount','txtPo','txtCustorde'],*/
                 /*記錄當前的資料*/
                 copy : function() {
                     this.data = new Array();
@@ -661,49 +663,33 @@
                 <table class="tview" id="tview">
                     <tr>
                         <td align="center" style="width:20px; color:black;"><a id="vewChk"> </a></td>
-                        <td align="center" style="width:80px; color:black;"><a id="vewDatea"> </a></td>
-                        <td align="center" style="width:80px; color:black;"><a id="vewTrandate"> </a></td>
-                        <td align="center" style="width:80px; color:black;"><a id="vewCarno"> </a></td>
-                        <td align="center" style="width:80px; color:black;"><a id="vewDriver"> </a></td>
-                        <td align="center" style="width:80px; color:black;"><a id="vewNick"> </a></td>
-                        <td align="center" style="width:120px; color:black;"><a id="vewStraddr_tb"> </a></td>
-                        <td align="center" style="width:120px; color:black;"><a id="vewEndaddr_tb"> </a></td>
-                        <td align="center" style="width:60px; color:black;"><a id="vewFill"> </a></td>
-                        <td align="center" style="width:60px; color:black;"><a id="vewMount"> </a></td>
-                        <td align="center" style="width:60px; color:black;"><a id="vewPrice"> </a></td>
-                        <td align="center" style="width:60px; color:black;"><a id="vewMount2"> </a></td>
-                        <td align="center" style="width:60px; color:black;"><a id="vewPrice2"> </a></td>
-                        <td align="center" style="width:60px; color:black;"><a id="vewPrice3"> </a></td>
-                        <td align="center" style="width:60px; color:black;"><a id="vewDiscount"> </a></td>
-                        <td align="center" style="width:120px; color:black;"><a id="vewBoat"> </a></td>
-                        <td align="center" style="width:120px; color:black;"><a id="vewShip"> </a></td>
-                        <td align="center" style="width:120px; color:black;"><a id="vewPo"> </a></td>
-                        <td align="center" style="width:120px; color:black;"><a id="vewCaseno1"> </a></td>
-                        <td align="center" style="width:120px; color:black;"><a id="vewCaseno2"> </a></td>
-                        <td align="center" style="width:120px; color:black;"><a id="vewCustorde"> </a></td>
+                        <td align="center" style="width:80px; color:black;">發送日期</td>
+                        <td align="center" style="width:80px; color:black;">配送日期</td>
+                        <td align="center" style="width:120px; color:black;">客戶</td>
+                        <td align="center" style="width:80px; color:black;">貨號</td>
+                        <td align="center" style="width:80px; color:black;">貨件運費</td>
+                        <td align="center" style="width:60px; color:black;">件數</td>
+                        <td align="center" style="width:60px; color:black;">板數</td>
+                        <td align="center" style="width:80px; color:black;">起點</td>
+                        <td align="center" style="width:80px; color:black;">迄點</td>
+                        <td align="center" style="width:80px; color:black;">車牌號碼</td>
+                        <td align="center" style="width:80px; color:black;">司機</td>
+                        <td align="center" style="width:80px; color:black;">運費</td>
                     </tr>
                     <tr>
                         <td ><input id="chkBrow.*" type="checkbox"/></td>
                         <td id="datea" style="text-align: center;">~datea</td>
                         <td id="trandate" style="text-align: center;">~trandate</td>
-                        <td id="carno" style="text-align: center;">~carno</td>
-                        <td id="driver" style="text-align: center;">~driver</td>
                         <td id="nick" style="text-align: center;">~nick</td>
+                        <td id="po" style="text-align: center;">~po</td>
+                        <td id="price,0" style="text-align: right;">~price,0</td>
+                        <td id="inmount,0" style="text-align: right;">~inmount,0</td>
+                        <td id="pton,0" style="text-align: right;">~pton,0</td>
                         <td id="straddr" style="text-align: center;">~straddr</td>
                         <td id="endaddr" style="text-align: center;">~endaddr</td>
-                        <td id="fill" style="text-align: center;">~fill</td>
-                        <td id="mount" style="text-align: right;">~mount</td>
-                        <td id="price" style="text-align: right;">~price</td>
-                        <td id="mount2" style="text-align: right;">~mount2</td>
-                        <td id="price2" style="text-align: right;">~price2</td>
-                        <td id="price3" style="text-align: right;">~price3</td>
-                        <td id="discount" style="text-align: right;">~discount</td>
-                        <td id="boatname" style="text-align: left;">~boatname</td>
-                        <td id="ship" style="text-align: left;">~ship</td>
-                        <td id="po" style="text-align: left;">~po</td>
-                        <td id="caseno" style="text-align: left;">~caseno</td>
-                        <td id="caseno2" style="text-align: left;">~caseno2</td>
-                        <td id="custorde" style="text-align: left;">~custorde</td>
+                        <td id="carno" style="text-align: center;">~carno</td>
+                        <td id="driver" style="text-align: center;">~driver</td>
+                        <td id="price2,0" style="text-align: right;">~price2,0</td>
                     </tr>
                 </table>
             </div>
