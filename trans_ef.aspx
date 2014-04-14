@@ -38,7 +38,7 @@
                 ,['txtDriverno', 'lblDriver', 'driver', 'noa,namea', 'txtDriverno,txtDriver', 'driver_b.aspx']
                 ,['txtCarno', 'lblCarno', 'car2', 'a.noa,driver,driverno', 'txtCarno,txtDriver,txtDriverno', 'car2_b.aspx']
                 ,['txtBoatno', 'lblBoat', 'boat', 'noa,boat', 'txtBoatno,txtBoat', 'boat_b.aspx']
-                ,['txtCardealno', '', 'cardeal', 'noa,comp', 'txtCardealno', 'cardeal_b.aspx']
+                ,['txtTggno', 'lblTggno', 'tgg', 'noa,comp', 'txtTggno,txtTgg', 'tgg_b.aspx']
                 ,['txtSaddr', '', 'view_road', 'memo', '0txtSaddr', 'road_b.aspx']
                 ,['txtAaddr', '', 'view_road', 'memo', '0txtAaddr', 'road_b.aspx']);
            
@@ -772,8 +772,11 @@
                     </tr>
                     <tr></tr>
                     <tr>
-                        <td><span> </span><a class="lbl">承運廠商</a></td>
-                        <td><input id="txtCardealno"  type="text" class="txt c1"/></td>
+                        <td><span> </span><a id="lblTggno" class="lbl btn">承運廠商</a></td>
+                        <td colspan="2">
+                            <input id="txtTggno"  type="text" style="float:left;width:50%;"/>
+                            <input id="txtTgg"  type="text" style="float:left;width:50%;"/>
+                        </td>
                         <td><span> </span><a id="lblCarno" class="lbl btn"> </a></td>
                         <td><input id="txtCarno"  type="text" class="txt c1"/></td>
                         <td><span> </span><a id="lblDriver" class="lbl btn"> </a></td>
