@@ -658,6 +658,33 @@
     ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
     >
         <!--#include file="../inc/toolbar.inc"-->
+        <div style="position:absolute; display:none;">
+            <table >
+                <tr>
+                    <td></td>
+                    <td>日</td>
+                    <td>一</td>
+                    <td>二</td>
+                    <td>三</td>
+                    <td>四</td>
+                    <td>五</td>
+                    <td>六</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><input type="checkbox" id="check0"  /></td>
+                    <td><input type="checkbox" id="check1"  /></td>
+                    <td><input type="checkbox" id="check2"  /></td>
+                    <td><input type="checkbox" id="check3"  /></td>
+                    <td><input type="checkbox" id="check4"  /></td>
+                    <td><input type="checkbox" id="check5"  /></td>
+                    <td><input type="checkbox" id="check6"  /></td>
+                </tr>
+                <tr>
+                    <td colspan="8"></td>
+                </tr>
+            </table>
+        </div>
         <div id="dmain">
             <div class="dview" id="dview">
                 <table class="tview" id="tview">
