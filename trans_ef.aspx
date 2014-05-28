@@ -266,6 +266,19 @@
                 $('#txtIo').change(function(e){
                     $(this).val($(this).val().toUpperCase()); 
                 });
+                $('#btnCopy').click(function(e){
+                    $('#divCopy').toggle();
+                });
+                $('#btnTranscopy').click(function(e){
+                    var t_weekday='';
+                    var obj = $('#divCopy').find('input[type="checkbox"]');
+                    for(var i=0;i<obj.length;i++){
+                        if(obj.eq(i).prop('checked')){
+                            t_weekday += ''+(i%7+1);
+                        }
+                    }
+                    q_func('qtxt.query.trans_ef_copy', 'trans.txt,trans_ef_copy,' + r_userno+ ';' + r_name + ';' + $('#txtNoa').val() + ';'+ $('#textMon').val() + ';'+t_weekday);
+                });
                 q_xchgForm();
             }
 
@@ -276,6 +289,14 @@
                         q_boxClose2(s2);
                         break;
                 }
+            }
+            function q_funcPost(t_func, result) {
+                switch(t_func) {
+                    case 'qtxt.query.trans_ef_copy':
+                        location.reload();
+                        break;
+                }
+
             }
 
             function q_gtPost(t_name) {
@@ -658,30 +679,46 @@
     ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
     >
         <!--#include file="../inc/toolbar.inc"-->
-        <div style="position:absolute; display:none;">
-            <table >
-                <tr>
-                    <td></td>
-                    <td>日</td>
-                    <td>一</td>
-                    <td>二</td>
-                    <td>三</td>
-                    <td>四</td>
-                    <td>五</td>
-                    <td>六</td>
+        <input type="button" id="btnCopy" value="複製" style="width:100px;">
+        <div id="divCopy" style="position:absolute; display:none;background-color: pink; width:400px;">
+            <table style="width:100%;">
+                <tr style="height:1px;">
+                    <td style="width:10%;"> </td>
+                    <td style="width:10%;"> </td>
+                    <td style="width:10%;"> </td>
+                    <td style="width:10%;"> </td>
+                    <td style="width:10%;"> </td>
+                    <td style="width:10%;"> </td>
+                    <td style="width:10%;"> </td>
                 </tr>
                 <tr>
-                    <td></td>
-                    <td><input type="checkbox" id="check0"  /></td>
-                    <td><input type="checkbox" id="check1"  /></td>
-                    <td><input type="checkbox" id="check2"  /></td>
-                    <td><input type="checkbox" id="check3"  /></td>
-                    <td><input type="checkbox" id="check4"  /></td>
-                    <td><input type="checkbox" id="check5"  /></td>
-                    <td><input type="checkbox" id="check6"  /></td>
+                    <td colspan="2" style="text-align: right;">月份</td>
+                    <td colspan="5"><input type="text" id="textMon" style="width:100px;"/></td>
                 </tr>
                 <tr>
-                    <td colspan="8"></td>
+                    <td style="text-align: center;">日</td>
+                    <td style="text-align: center;">一</td>
+                    <td style="text-align: center;">二</td>
+                    <td style="text-align: center;">三</td>
+                    <td style="text-align: center;">四</td>
+                    <td style="text-align: center;">五</td>
+                    <td style="text-align: center;">六</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;"><input type="checkbox" id="check0"  /></td>
+                    <td style="text-align: center;"><input type="checkbox" id="check1"  /></td>
+                    <td style="text-align: center;"><input type="checkbox" id="check2"  /></td>
+                    <td style="text-align: center;"><input type="checkbox" id="check3"  /></td>
+                    <td style="text-align: center;"><input type="checkbox" id="check4"  /></td>
+                    <td style="text-align: center;"><input type="checkbox" id="check5"  /></td>
+                    <td style="text-align: center;"><input type="checkbox" id="check6"  /></td>
+                </tr>
+                <tr style="height: 35px;">
+                    
+                </tr>
+                <tr>
+                    <td colspan="4"></td>
+                    <td colspan="3"><input type="button" id="btnTranscopy" value="確定"></td>
                 </tr>
             </table>
         </div>
