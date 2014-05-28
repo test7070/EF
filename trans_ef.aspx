@@ -202,7 +202,7 @@
                 $('#btnIns').val($('#btnIns').val() + "(F8)");
                 $('#btnOk').val($('#btnOk').val() + "(F9)");
                 
-                bbmMask = [['txtDatea', r_picd],['txtTrandate', r_picd]];
+                bbmMask = [['txtDatea', r_picd],['txtTrandate', r_picd],['textMon',r_picm]];
                 q_mask(bbmMask);
                 $("#cmbCalctype").focus(function() {
                     var len = $("#cmbCalctype").children().length > 0 ? $("#cmbCalctype").children().length : 1;
