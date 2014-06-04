@@ -270,6 +270,11 @@
                     $('#divCopy').toggle();
                 });
                 $('#btnTranscopy').click(function(e){
+                    if($('#textMon').val().length==0){
+                        alert('請輸入月份。');
+                        return;
+                    }
+                    
                     var t_weekday='';
                     var obj = $('#divCopy').find('input[type="checkbox"]');
                     for(var i=0;i<obj.length;i++){
