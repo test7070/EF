@@ -459,6 +459,19 @@
                     return;
                 }*/
                 var t_days = 0;
+                var t_date1 = q_date();
+                var t_date2 = $('#txtDatea').val();
+                t_date1 = new Date(dec(t_date1.substr(0, 3)) + 1911, dec(t_date1.substring(4, 6)) - 1, dec(t_date1.substring(7, 9)));
+                t_date2 = new Date(dec(t_date2.substr(0, 3)) + 1911, dec(t_date2.substring(4, 6)) - 1, dec(t_date2.substring(7, 9)));
+                t_days = Math.abs(t_date2 - t_date1) / (1000 * 60 * 60 * 24) + 1;
+                
+                if(!(q_date().substring(0,6)==$('#txtDatea').val().substring(0,6) || t_days<3))
+                {
+                    alert('日期已鎖定，禁止新增修改。');
+                    Unlock();
+                    return;
+                }                
+                var t_days = 0;
                 var t_date1 = $('#txtDatea').val();
                 var t_date2 = $('#txtTrandate').val();
                 t_date1 = new Date(dec(t_date1.substr(0, 3)) + 1911, dec(t_date1.substring(4, 6)) - 1, dec(t_date1.substring(7, 9)));
