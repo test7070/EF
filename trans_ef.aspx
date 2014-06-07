@@ -274,6 +274,24 @@
                         alert('請輸入月份。');
                         return;
                     }
+                    var t_date = q_date();
+                    try{
+                        //25日(含)前可新增當月
+                        if(parseInt(t_date.substring(8,t_date.length))<=25){
+                            if($('#textMon').val()<t_date.substring(0,6)){
+                                alert('新增的資料只能是【'+t_date.substring(0,6)+'】(含)後的。');
+                                return;
+                            }
+                        }else{
+                            if($('#textMon').val()<=t_date.substring(0,6)){
+                                alert('新增的資料只能是【'+t_date.substring(0,6)+'】(不含)後的。');
+                                return;
+                            }
+                        }         
+                    }catch(e){
+                        alert('發現錯誤。');
+                        return;
+                    }
                     
                     var t_weekday='';
                     var obj = $('#divCopy').find('input[type="checkbox"]');
@@ -429,6 +447,8 @@
             function btnModi() {
                 if (emp($('#txtNoa').val()))
                     return;
+                if(!isEdit())
+                    return;
                 _btnModi();
                 sum();
             }
@@ -439,6 +459,44 @@
                 if (!(q_cur == 1 || q_cur == 2))
                     return false;
                 Unlock(1);
+            }
+            function isEdit(){
+                //2. 日期防呆功能：僅能輸入當月資料，其它月份資料不可輸入。
+                //3. 每月25號是否將輸入功能鎖住，禁止各項資料輸入，以利結帳作業。
+                
+                //當月: 上個月26號~本月25號         
+                var t_date =  $('#txtDatea').val();
+                var t_date1 = q_date();
+                var t_date2 = q_date();
+                t_date = new Date(dec(t_date.substr(0, 3)) + 1911, dec(t_date.substring(4, 6)) - 1, dec(t_date.substring(7, 9)));
+               
+                t_date1 = new Date(dec(t_date1.substr(0, 3)) + 1911, dec(t_date1.substring(4, 6)) - 1, dec(t_date1.substring(7, 9)));
+                t_date2 = new Date(dec(t_date2.substr(0, 3)) + 1911, dec(t_date2.substring(4, 6)) - 1, dec(t_date2.substring(7, 9)));
+                if(t_date1.getDate()<=25){
+                    //上個月26號~本月25號   
+                    t_date1.setDate(20);
+                    t_date1.setDate(t_date1.getDate()-25);
+                    t_date1.setDate(26);
+                    t_date2.setDate(25);
+                }else{
+                    //本月26號~下個月25號   
+                    t_date1.setDate(26);   
+                    t_date2.setDate(t_date2.getDate()+25);
+                    t_date2.setDate(25);
+                }
+                if( t_date<t_date1 || t_date>t_date2){
+                    alert('發送日期需在【'
+                    +(t_date1.getFullYear()-1911)+'/'
+                    +(t_date1.getMonth()+1<10?'0'+(t_date1.getMonth()+1):(t_date1.getMonth()+1))+'/'
+                    +(t_date1.getDate()<10?'0'+t_date1.getDate():t_date1.getDate())
+                    +'】~【'
+                    +(t_date2.getFullYear()-1911)+'/'
+                    +(t_date2.getMonth()+1<10?'0'+(t_date2.getMonth()+1):(t_date2.getMonth()+1))+'/'
+                    +(t_date2.getDate()<10?'0'+t_date2.getDate():t_date2.getDate())
+                    +'】');
+                    return false;
+                }
+                return true;
             }
             function btnOk() {
                 Lock(1,{opacity:0});
@@ -458,19 +516,10 @@
                     Unlock(1);
                     return;
                 }*/
-                var t_days = 0;
-                var t_date1 = q_date();
-                var t_date2 = $('#txtDatea').val();
-                t_date1 = new Date(dec(t_date1.substr(0, 3)) + 1911, dec(t_date1.substring(4, 6)) - 1, dec(t_date1.substring(7, 9)));
-                t_date2 = new Date(dec(t_date2.substr(0, 3)) + 1911, dec(t_date2.substring(4, 6)) - 1, dec(t_date2.substring(7, 9)));
-                t_days = Math.abs(t_date2 - t_date1) / (1000 * 60 * 60 * 24) + 1;
-                
-                if(!(q_date().substring(0,6)==$('#txtDatea').val().substring(0,6) || t_days<3))
-                {
-                    alert('日期已鎖定，禁止新增修改。');
-                    Unlock();
+                if(!isEdit()){
+                    Unlock(1);
                     return;
-                }                
+                }
                 var t_days = 0;
                 var t_date1 = $('#txtDatea').val();
                 var t_date2 = $('#txtTrandate').val();
