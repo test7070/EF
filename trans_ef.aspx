@@ -463,8 +463,6 @@
             function isEdit(){
                 //2. 日期防呆功能：僅能輸入當月資料，其它月份資料不可輸入。
                 //3. 每月25號是否將輸入功能鎖住，禁止各項資料輸入，以利結帳作業。
-                
-                //當月: 上個月26號~本月25號         
                 var t_date =  $('#txtDatea').val();
                 var t_date1 = q_date();
                 var t_date2 = q_date();
@@ -473,16 +471,19 @@
                 t_date1 = new Date(dec(t_date1.substr(0, 3)) + 1911, dec(t_date1.substring(4, 6)) - 1, dec(t_date1.substring(7, 9)));
                 t_date2 = new Date(dec(t_date2.substr(0, 3)) + 1911, dec(t_date2.substring(4, 6)) - 1, dec(t_date2.substring(7, 9)));
                 if(t_date1.getDate()<=25){
-                    //上個月26號~本月25號   
+                    //上個月26號~本月底   
                     t_date1.setDate(20);
                     t_date1.setDate(t_date1.getDate()-25);
                     t_date1.setDate(26);
-                    t_date2.setDate(25);
+                    t_date2.setDate(t_date2.getDate()+25);
+                    t_date2.setDate(0);
                 }else{
-                    //本月26號~下個月25號   
+                    //本月26號~下個月底  
                     t_date1.setDate(26);   
                     t_date2.setDate(t_date2.getDate()+25);
                     t_date2.setDate(25);
+                    t_date2.setDate(t_date2.getDate()+25);
+                    t_date2.setDate(0);
                 }
                 if( t_date<t_date1 || t_date>t_date2){
                     alert('發送日期需在【'
