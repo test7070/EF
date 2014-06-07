@@ -527,7 +527,7 @@
                 t_date2 = new Date(dec(t_date2.substr(0, 3)) + 1911, dec(t_date2.substring(4, 6)) - 1, dec(t_date2.substring(7, 9)));
                 t_days = Math.abs(t_date2 - t_date1) / (1000 * 60 * 60 * 24) + 1;
                 if(t_days>60){
-                    alert(q_getMsg('lblDatea')+'、'+q_getMsg('lblTrandate')+'相隔天數不可多於60天。');
+                    alert('發送日期、配送日期相隔天數不可多於60天。');
                     Unlock(1);
                     return;
                 }
