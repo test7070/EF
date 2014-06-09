@@ -201,6 +201,8 @@
                 q_modiDay= q_getPara('sys.modiday2');  /// 若未指定， d4=  q_getPara('sys.modiday'); 
                 $('#btnIns').val($('#btnIns').val() + "(F8)");
                 $('#btnOk').val($('#btnOk').val() + "(F9)");
+                $('#textBdate').datepicker();
+                $('#textEdate').datepicker();
                 
                 bbmMask = [['txtDatea', r_picd],['txtTrandate', r_picd],['textBdate',r_picd],['textEdate',r_picd]];
                 q_mask(bbmMask);
@@ -763,7 +765,7 @@
                     <td colspan="2" style="text-align: right;">日期</td>
                     <td colspan="5">
                         <input type="text" id="textBdate" style="width:100px;float:left;"/>
-                        <span  style="width:30px;float:left;"> ~</span>
+                        <span  style="width:30px;float:left;text-align: center;"> ~</span>
                         <input type="text" id="textEdate" style="width:100px;float:left;"/>
                     </td>
                 </tr>
