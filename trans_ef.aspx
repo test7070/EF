@@ -202,7 +202,7 @@
                 $('#btnIns').val($('#btnIns').val() + "(F8)");
                 $('#btnOk').val($('#btnOk').val() + "(F9)");
                 
-                bbmMask = [['txtDatea', r_picd],['txtTrandate', r_picd],['textMon',r_picm]];
+                bbmMask = [['txtDatea', r_picd],['txtTrandate', r_picd],['textBdate',r_picd],['textEdate',r_picd]];
                 q_mask(bbmMask);
                 $("#cmbCalctype").focus(function() {
                     var len = $("#cmbCalctype").children().length > 0 ? $("#cmbCalctype").children().length : 1;
@@ -270,12 +270,12 @@
                     $('#divCopy').toggle();
                 });
                 $('#btnTranscopy').click(function(e){
-                    if($('#textMon').val().length==0){
-                        alert('請輸入月份。');
+                    if($('#textBdate').val().length==0 || $('#textEdate').val().length==0){
+                        alert('請輸入日期。');
                         return;
                     }
                     var t_date = q_date();
-                    try{
+                    /*try{
                         //25日(含)前可新增當月
                         if(parseInt(t_date.substring(8,t_date.length))<=25){
                             if($('#textMon').val()<t_date.substring(0,6)){
@@ -291,7 +291,7 @@
                     }catch(e){
                         alert('發現錯誤。');
                         return;
-                    }
+                    }*/
                     
                     var t_weekday='';
                     var obj = $('#divCopy').find('input[type="checkbox"]');
@@ -300,7 +300,7 @@
                             t_weekday += ''+(i%7+1);
                         }
                     }
-                    q_func('qtxt.query.trans_ef_copy', 'trans.txt,trans_ef_copy,' + r_userno+ ';' + r_name + ';' + $('#txtNoa').val() + ';'+ $('#textMon').val() + ';'+t_weekday);
+                    q_func('qtxt.query.trans_ef_copy', 'trans.txt,trans_ef_copy,' + r_userno+ ';' + r_name + ';' + $('#txtNoa').val() + ';'+ $('#textBdate').val()+ ';'+ $('#textEdate').val() + ';'+t_weekday);
                 });
                 q_xchgForm();
             }
@@ -760,8 +760,12 @@
                     <td style="width:10%;"> </td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="text-align: right;">月份</td>
-                    <td colspan="5"><input type="text" id="textMon" style="width:100px;"/></td>
+                    <td colspan="2" style="text-align: right;">日期</td>
+                    <td colspan="5">
+                        <input type="text" id="textBdate" style="width:100px;float:left;"/>
+                        <span  style="width:30px;float:left;"> ~</span>
+                        <input type="text" id="textEdate" style="width:100px;float:left;"/>
+                    </td>
                 </tr>
                 <tr>
                     <td style="text-align: center;">日</td>
