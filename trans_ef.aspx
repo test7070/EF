@@ -277,24 +277,6 @@
                         return;
                     }
                     var t_date = q_date();
-                    /*try{
-                        //25日(含)前可新增當月
-                        if(parseInt(t_date.substring(8,t_date.length))<=25){
-                            if($('#textMon').val()<t_date.substring(0,6)){
-                                alert('新增的資料只能是【'+t_date.substring(0,6)+'】(含)後的。');
-                                return;
-                            }
-                        }else{
-                            if($('#textMon').val()<=t_date.substring(0,6)){
-                                alert('新增的資料只能是【'+t_date.substring(0,6)+'】(不含)後的。');
-                                return;
-                            }
-                        }         
-                    }catch(e){
-                        alert('發現錯誤。');
-                        return;
-                    }*/
-                    
                     var t_weekday='';
                     var obj = $('#divCopy').find('input[type="checkbox"]');
                     for(var i=0;i<obj.length;i++){
@@ -303,6 +285,25 @@
                         }
                     }
                     q_func('qtxt.query.trans_ef_copy', 'trans.txt,trans_ef_copy,' + r_userno+ ';' + r_name + ';' + $('#txtNoa').val() + ';'+ $('#textBdate').val()+ ';'+ $('#textEdate').val() + ';'+t_weekday);
+                });
+                $('#cmbCarteamno').blur(function(e){
+                    if($('#cmbCarteamno').val()=='10'){
+                        //B段
+                        $('#lblMount_ef').html('起程板數');
+                        $('#lblPton_ef').html('回程板數');
+                    }else{
+                        $('#lblMount_ef').html('件數');
+                        $('#lblPton_ef').html('板數');
+                    }
+                }).click(function(e){
+                    if($('#cmbCarteamno').val()=='10'){
+                        //B段
+                        $('#lblMount_ef').html('起程板數');
+                        $('#lblPton_ef').html('回程板數');
+                    }else{
+                        $('#lblMount_ef').html('件數');
+                        $('#lblPton_ef').html('板數');
+                    }
                 });
                 q_xchgForm();
             }
@@ -561,6 +562,16 @@
                 trans.refresh();
                 $('#txtCaseno').css('color',$.trim($('#txtCaseno').val()).length==0||checkCaseno($.trim($('#txtCaseno').val()))?'black':'darkred');
                 $('#txtCaseno2').css('color',$.trim($('#txtCaseno2').val()).length==0||checkCaseno($.trim($('#txtCaseno2').val()))?'black':'darkred');
+                
+                if($('#cmbCarteamno').val()=='10'){
+                    //B段
+                    $('#lblMount_ef').html('起程板數');
+                    $('#lblPton_ef').html('回程板數');
+                }else{
+                    $('#lblMount_ef').html('件數');
+                    $('#lblPton_ef').html('板數');
+                }
+           
             }
 
             function readonly(t_para, empty) {
@@ -869,12 +880,12 @@
                     <tr>
                         <td><span> </span><a class="lbl">貨件運費</a></td>
                         <td><input id="txtPrice"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">件數</a></td>
+                        <td><span> </span><a id="lblMount_ef" class="lbl">件數</a></td>
                         <td>
                             <input id="txtInmount"  type="text" class="txt c1 num"/>
                             <input id="txtMount"  type="text" style="display:none;"/>
                         </td>
-                        <td><span> </span><a class="lbl">板數</a></td>
+                        <td><span> </span><a id="lblPton_ef" class="lbl">板數</a></td>
                         <td><input id="txtPton"  type="text" class="txt c1 num"/></td>
                     </tr>
                     <tr>
