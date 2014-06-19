@@ -122,6 +122,12 @@
                         type : '8',
                         name : 'xdetail',
                         value : ['detail@明細']
+                    }, {/*14-[20],[21]-廠商*/
+                        type : '2',
+                        name : 'tgg',
+                        dbf : 'tgg',
+                        index : 'noa,comp',
+                        src : 'tgg_b.aspx'
                     }]
                 });
                 q_popAssign();
