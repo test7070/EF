@@ -34,6 +34,7 @@
             brwCount2 = 15;
             var string = decodeURIComponent(location.href);
             if( string.indexOf('\'all\'=\'all\'')>=0){
+                //z_tran_ef10 用
                 string = string.replace(/.*\'all\'=\'all\' and (\d*)=\d*.*/g,'$1');
                 brwCount2 = parseInt(string);
             }
