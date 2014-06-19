@@ -24,13 +24,19 @@
             var bbmNum = [['txtInmount',10,0,1],['txtPton',10,0,1],['txtPrice',10,0,1],['txtPrice2',10,0,1]];
             var bbmMask = [];
             q_sqlCount = 6;
-            brwCount = 6;
+           
             brwList = [];
             brwNowPage = 0;
             brwKey = 'noa';
             q_desc = 1;
             q_xchg = 1;
+            brwCount = 6;
             brwCount2 = 15;
+            var string = decodeURIComponent(location.href);
+            if( string.indexOf('\'all\'=\'all\'')>=0){
+                string = string.replace(/.*\'all\'=\'all\' and (\d*)=\d*.*/g,'$1');
+                brwCount2 = parseInt(string);
+            }
             aPop = new Array(['txtStraddrno','lblStraddr_tb','addr2','noa,addr','txtStraddrno,txtStraddr','addr2_b.aspx']
                 ,['txtEndaddrno','lblEndaddr_tb','addr2','noa,addr','txtEndaddrno,txtEndaddr','addr2_b.aspx']
                 ,['txtUccno','lblUcc','ucc','noa,product','txtUccno,txtProduct','ucc_b.aspx']
