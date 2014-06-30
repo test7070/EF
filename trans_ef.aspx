@@ -457,8 +457,9 @@
             function btnModi() {
                 if (emp($('#txtNoa').val()))
                     return;
-                if(!isEdit())
-                    return;
+				//1030630取消限制修改日期
+                /*if(!isEdit())
+                    return;*/
                 _btnModi();
                 sum();
             }
