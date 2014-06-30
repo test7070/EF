@@ -528,10 +528,10 @@
                     Unlock(1);
                     return;
                 }*/
-                if(!isEdit()){
+                /*if(!isEdit()){
                     Unlock(1);
                     return;
-                }
+                }*/
                 var t_days = 0;
                 var t_date1 = $('#txtDatea').val();
                 var t_date2 = $('#txtTrandate').val();
