@@ -20,8 +20,11 @@
             }
 
             var q_name = "trans";
-            var q_readonly = ['txtNoa','txtOrdeno','txtWorker','txtWorker2'];
-            var bbmNum = [['txtInmount',10,0,1],['txtPton',10,0,1],['txtPrice',10,0,1],['txtPrice2',10,0,1]];
+            var q_readonly = ['txtNoa','txtOrdeno','txtWorker','txtWorker2','txtUnpack'];
+            var bbmNum = [['txtInmount',10,0,1],['txtPton',10,0,1],['txtPrice',10,0,1],['txtPrice2',10,0,1]
+                ,['txtTolls',10,0,1],['txtReserve',10,0,1],['txtOverh',10,0,1]
+                ,['txtOverw',10,0,1],['txtCommission',10,0,1],['txtCommission2',10,0,1]
+                ,['txtUnpack',10,0,1]];
             var bbmMask = [];
             q_sqlCount = 6;
            
@@ -57,9 +60,12 @@
                 var t_price3 = q_float('txtPrice3');
                 var t_total = round(t_price,0);
                 var t_total2 = round(q_add(t_price2,t_price3),0);
-
+                
+                var t_unpack = q_float('txtTolls') + q_float('txtReserve') + q_float('txtOverh')
+                    +q_float('txtOverw')+q_float('txtCommission')+q_float('txtCommission2');
                 $('#txtTotal').val(q_trv(t_total));
                 $('#txtTotal2').val(q_trv(t_total2));
+                $('#txtUnpack').val(q_trv(t_unpack));
             }
             
             function currentData() {
@@ -171,7 +177,6 @@
                     $('#txtPrice2').attr('readonly','readonly').css('color','green').css('background','rgb(237,237,237)');
                     $('#txtPrice3').attr('readonly','readonly').css('color','green').css('background','rgb(237,237,237)');
                     $('#txtDiscount').attr('readonly','readonly').css('color','green').css('background','rgb(237,237,237)');
-                    $('#txtTolls').attr('readonly','readonly').css('color','green').css('background','rgb(237,237,237)');
                     $('#cmbCalctype').attr('disabled','disabled');
                     $('#cmbCarteamno').attr('disabled','disabled');
                     if($('#txtOrdeno').val().length>0){
@@ -264,6 +269,27 @@
                     sum();
                 });
                 $('#txtEmiles').change(function(){
+                    sum();
+                });
+                $('#txtTolls').change(function(){
+                    sum();
+                });
+                $('#txtReserve').change(function(){
+                    sum();
+                });
+                $('#txtOverh').change(function(){
+                    sum();
+                });
+                $('#txtOverw').change(function(){
+                    sum();
+                });
+                $('#txtCommission').change(function(){
+                    sum();
+                });
+                $('#txtCommission2').change(function(){
+                    sum();
+                });
+                $('#txtUnpack').change(function(){
                     sum();
                 });
                 $('#txtTrandate').change(function(e){
@@ -810,7 +836,7 @@
                     
                 </tr>
                 <tr>
-                    <td colspan="4"></td>
+                    <td colspan="4"> </td>
                     <td colspan="3"><input type="button" id="btnTranscopy" value="確定"></td>
                 </tr>
             </table>
@@ -927,7 +953,37 @@
                         <td><span> </span><a class="lbl">行駛里程數</a></td>
                         <td><input id="txtMiles"  type="text" class="txt c1 num"/></td>
                     </tr>
-                    <tr></tr>
+                    <tr style="background:pink;">
+                        <td><span> </span><a class="lbl">班次</a></td>
+                        <td colspan="2"><input id="txtCasecust"  type="text" class="txt c1"/></td>
+                        <td colspan="2"><input id="txtCasecustno"  type="text" class="txt c1"/></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="tdZ"></td>
+                    </tr>
+                    <tr style="background:pink;">
+                        <td><span> </span><a class="lbl">表定里程</a></td>
+                        <td><input id="txtTolls"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">空車頭</a></td>
+                        <td><input id="txtReserve"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">原里程增/減</a></td>
+                        <td><input id="txtOverh"  type="text" class="txt c1 num"/></td>
+                        <td></td>
+                        <td></td>
+                        <td class="tdZ"></td>
+                    </tr>
+                    <tr style="background:pink;">
+                        <td><span> </span><a class="lbl">未請里程</a></td>
+                        <td><input id="txtOverw"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">調度附掛增/減</a></td>
+                        <td><input id="txtCommission"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">加班里程</a></td>
+                        <td><input id="txtCommission2"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">總里程</a></td>
+                        <td><input id="txtUnpack"  type="text" class="txt c1 num"/></td>
+                        <td class="tdZ"></td>
+                    </tr>                 
                     <tr>
                         <td><span> </span><a id="lblTggno" class="lbl btn">承運廠商</a></td>
                         <td colspan="2">
@@ -981,8 +1037,6 @@
                         <td colspan="2"><input id="txtShip" type="text" class="txt c1"/></td>
                     </tr>
                     <tr style="display:none;">
-                        <td><span> </span><a id="lblPo" class="lbl"> </a></td>
-                        <td colspan="2"><input id="txtPo"  type="text" class="txt c1"/></td>
                         <td><span> </span><a id="lblCustorde" class="lbl"> </a></td>
                         <td colspan="2"><input id="txtCustorde" type="text" class="txt c1"/></td>
                     </tr>
