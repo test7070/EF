@@ -24,7 +24,8 @@
             var bbmNum = [['txtInmount',10,0,1],['txtPton',10,0,1],['txtPrice',10,0,1],['txtPrice2',10,0,1]
                 ,['txtTolls',10,0,1],['txtReserve',10,0,1],['txtOverh',10,0,1]
                 ,['txtOverw',10,0,1],['txtCommission',10,0,1],['txtCommission2',10,0,1]
-                ,['txtUnpack',10,0,1]];
+                ,['txtUnpack',10,0,1],['txtMount3',10,0,1],['txtMount4',10,0,1]
+                ,['txtWeight2',10,0,1],['txtWeight3',10,0,1]];
             var bbmMask = [];
             q_sqlCount = 6;
            
@@ -956,10 +957,11 @@
                     <tr style="background:pink;">
                         <td><span> </span><a class="lbl">班次</a></td>
                         <td colspan="2"><input id="txtCasecust"  type="text" class="txt c1"/></td>
-                        <td colspan="2"><input id="txtCasecustno"  type="text" class="txt c1"/></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td><input id="txtCasecustno"  type="text" class="txt c1"/></td>
+                        <td><span> </span><a class="lbl">支票袋</a></td>
+                        <td><input id="txtMount3"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">移櫃津貼</a></td>
+                        <td><input id="txtMount4"  type="text" class="txt c1 num"/></td>
                         <td class="tdZ"></td>
                     </tr>
                     <tr style="background:pink;">
@@ -983,7 +985,18 @@
                         <td><span> </span><a class="lbl">總里程</a></td>
                         <td><input id="txtUnpack"  type="text" class="txt c1 num"/></td>
                         <td class="tdZ"></td>
-                    </tr>                 
+                    </tr>   
+                    <tr style="background:pink;">
+                        <td><span> </span><a class="lbl">棧板里程</a></td>
+                        <td><input id="txtWeight2"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">營收</a></td>
+                        <td><input id="txtWeight3"  type="text" class="txt c1 num"/></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="tdZ"></td>
+                    </tr>               
                     <tr>
                         <td><span> </span><a id="lblTggno" class="lbl btn">承運廠商</a></td>
                         <td colspan="2">
