@@ -25,7 +25,9 @@
                 ,['txtTolls',10,0,1],['txtReserve',10,0,1],['txtOverh',10,0,1]
                 ,['txtOverw',10,0,1],['txtCommission',10,0,1],['txtCommission2',10,0,1]
                 ,['txtUnpack',10,0,1],['txtMount3',10,0,1],['txtMount4',10,0,1]
-                ,['txtWeight2',10,0,1],['txtWeight3',10,0,1]];
+                ,['txtWeight2',10,0,1],['txtWeight3',10,0,1]
+                ,['txtValue1',10,0,1],['txtValue2',10,0,1],['txtValue3',10,0,1]
+                ,['txtValue4',10,0,1],['txtValue5',10,0,1],['txtValue6',10,0,1]];
             var bbmMask = [];
             q_sqlCount = 6;
            
@@ -996,7 +998,29 @@
                         <td></td>
                         <td></td>
                         <td class="tdZ"></td>
-                    </tr>               
+                    </tr>                   
+                    <tr style="background:burlywood;">
+                        <td><span> </span><a class="lbl">領櫃</a></td>
+                        <td><input id="txtValue2"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">送櫃 </a></td>
+                        <td><input id="txtValue3"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">收櫃</a></td>
+                        <td><input id="txtValue4"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">交櫃</a></td>
+                        <td><input id="txtValue5"  type="text" class="txt c1 num"/></td>
+                        <td class="tdZ"></td>
+                    </tr>        
+                    <tr style="background:burlywood;">
+                        <td><span> </span><a class="lbl">油量</a></td>
+                        <td><input id="txtValue1"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">板架</a></td>
+                        <td><input id="txtCardno"  type="text" class="txt c1"/></td>
+                        <td><span> </span><a class="lbl">定價金額</a></td>
+                        <td><input id="txtValue6"  type="text" class="txt c1 num"/></td>
+                        <td></td>
+                        <td></td>
+                        <td class="tdZ"></td>
+                    </tr>
                     <tr>
                         <td><span> </span><a id="lblTggno" class="lbl btn">承運廠商</a></td>
                         <td colspan="2">
