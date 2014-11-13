@@ -1035,21 +1035,21 @@
                     <tr style="background:#868A08;">
                         <td><span> </span><a class="lbl">常溫未訂店數</a></td>
                         <td><input id="txtValue11"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">EC件數</a></td>
+                        <td><span> </span><a class="lbl">到店運費</a></td>
                         <td><input id="txtValue12"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">EC運費</a></td>
+                        <td><span> </span><a class="lbl">EC件數</a></td>
                         <td><input id="txtValue13"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">膠外件數</a></td>
+                        <td><span> </span><a class="lbl">EC運費</a></td>
                         <td><input id="txtValue14"  type="text" class="txt c1 num"/></td>
                         <td class="tdZ"></td>
                     </tr>
                     <tr style="background:#868A08;">
-                        <td><span> </span><a class="lbl">膠外運費</a></td>
+                        <td><span> </span><a class="lbl">膠外件數</a></td>
                         <td><input id="txtValue15"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">配送籃數</a></td>
+                        <td><span> </span><a class="lbl">膠外運費</a></td>
                         <td><input id="txtValue16"  type="text" class="txt c1 num"/></td>
-                        <td> </td>
-                        <td> </td>
+                        <td><span> </span><a class="lbl">配送籃數</a></td>
+                        <td><input id="txtValue17"  type="text" class="txt c1 num"/></td>
                         <td> </td>
                         <td> </td>
                         <td class="tdZ"></td>
