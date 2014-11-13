@@ -117,7 +117,7 @@
     >
         <div style='width:400px; text-align:center;padding:15px;' >
             <table id="seek"  border="1"   cellpadding='3' cellspacing='2' style='width:100%;' >
-                <tr class='seek_tr' style="display:none;">
+                <tr class='seek_tr'>
                     <td class='seek'  style="width:20%;"><a id='lblCarteam'> </a></td>
                     <td><select id="cmbCarteam" style="width:215px; font-size:medium;" > </select></td>
                 </tr>
