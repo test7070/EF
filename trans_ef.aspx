@@ -1021,6 +1021,39 @@
                         <td></td>
                         <td class="tdZ"></td>
                     </tr>
+                    <tr style="background:#868A08;">
+                        <td><span> </span><a class="lbl">單店運費</a></td>
+                        <td><input id="txtValue7"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">共配運費</a></td>
+                        <td><input id="txtValue8"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">共配店數</a></td>
+                        <td><input id="txtValue9"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">專車店數</a></td>
+                        <td><input id="txtValue10"  type="text" class="txt c1 num"/></td>
+                        <td class="tdZ"></td>
+                    </tr>
+                    <tr style="background:#868A08;">
+                        <td><span> </span><a class="lbl">常溫未訂店數</a></td>
+                        <td><input id="txtValue11"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">EC件數</a></td>
+                        <td><input id="txtValue12"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">EC運費</a></td>
+                        <td><input id="txtValue13"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">膠外件數</a></td>
+                        <td><input id="txtValue14"  type="text" class="txt c1 num"/></td>
+                        <td class="tdZ"></td>
+                    </tr>
+                    <tr style="background:#868A08;">
+                        <td><span> </span><a class="lbl">膠外運費</a></td>
+                        <td><input id="txtValue15"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">應付運費</a></td>
+                        <td><input id="txtValue16"  type="text" class="txt c1 num"/></td>
+                        <td> </td>
+                        <td> </td>
+                        <td> </td>
+                        <td> </td>
+                        <td class="tdZ"></td>
+                    </tr>
                     <tr>
                         <td><span> </span><a id="lblTggno" class="lbl btn">承運廠商</a></td>
                         <td colspan="2">
