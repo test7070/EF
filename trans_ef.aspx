@@ -1046,7 +1046,7 @@
                     <tr style="background:#868A08;">
                         <td><span> </span><a class="lbl">膠外運費</a></td>
                         <td><input id="txtValue15"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">應付運費</a></td>
+                        <td><span> </span><a class="lbl">配送籃數</a></td>
                         <td><input id="txtValue16"  type="text" class="txt c1 num"/></td>
                         <td> </td>
                         <td> </td>
