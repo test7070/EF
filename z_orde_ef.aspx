@@ -31,14 +31,55 @@
                 q_langShow();
                 q_popAssign();
 
-                $('#txtXdate1').mask('999/99/99');
-                $('#txtXdate1').datepicker();
-                $('#txtXdate2').mask('999/99/99');
-                $('#txtXdate2').datepicker();
+                $('#txtOrdedate1').mask('999/99/99');
+                $('#txtOrdedate1').datepicker();
+                $('#txtOrdedate2').mask('999/99/99');
+                $('#txtOrdedate2').datepicker();
+
+                $( '<input type="button" id="btnImport" value="匯入訂單" style="float:right;height:30px;">' ).insertAfter( "#txtOrdedate2");
                 
-                var t_noa=typeof(q_getId()[5])=='undefined'?'':q_getId()[5];
-                t_noa  =  t_noa.replace('noa=','');
-                $('#txtXnoa').val(t_noa);
+                $('#btnImport').click(function(e){
+                	Lock(1);
+                	var t_bdate = $('#txtOrdedate1').val();
+                	var t_edate = $('#txtOrdedate2').val();
+                	
+                	try{
+                		t_bdate = (t_bdate.length==0?"":parseInt(t_bdate.substring(0,3))+1911)+t_bdate.substring(3,t_bdate.length);
+                		t_edate = (t_edate.length==0?"":parseInt(t_edate.substring(0,3))+1911)+t_edate.substring(3,t_edate.length);
+                	}catch(e){}
+                	//alert(t_bdate+'\n'+t_edate);
+                	$.ajax({
+						url : 'getorde_ct.aspx'
+						, type : 'POST'
+						, data : JSON.stringify({bdate:t_bdate ,edate:t_edate })
+						, dataType : 'text'
+						, timeout : 0
+						, success : function(data) {
+						    if(data.length>0){
+						        alert(data);
+						    }
+						}, complete : function() {
+							Unlock(1);
+						}, error : function(jqXHR, exception) {
+							if (jqXHR.status === 0) {
+								alert('Not connect.\n Verify Network.<br>');
+							} else if (jqXHR.status == 404) {
+								alert( 'Requested page not found. [404]<br>');
+							} else if (jqXHR.status == 500) {
+								alert( 'Internal Server Error [500].<br>');
+							} else if (exception === 'parsererror') {
+								alert( 'Requested JSON parse failed.<br>');
+							} else if (exception === 'timeout') {
+								alert( 'Time out error.<br>');
+							} else if (exception === 'abort') {
+								alert('Ajax request aborted.<br>');
+							} else {
+								alert( 'Uncaught Error.<br>' + jqXHR.responseText+'<br>');
+							}
+						}
+					});
+                	
+                });
             }
         </script>
     </head>
@@ -51,6 +92,7 @@
             <div id="container">
                 <div id="q_report"></div>
             </div>
+            
             <div class="prt" style="margin-left: -40px;">
                 <!--#include file="../inc/print_ctrl.inc"-->
             </div>
