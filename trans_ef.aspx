@@ -1090,7 +1090,7 @@
                             <input id="txtProduct"  type="text" style="float:left;width:70%;"/>
                         </td>
                     </tr>
-                    <tr style="display:none;">
+                    <tr>
                         <td><span> </span><a id="lblCaseno" class="lbl"> </a></td>
                         <td colspan="3">
                             <input id="txtCaseno"  type="text" style="float:left;width:50%;"/>
