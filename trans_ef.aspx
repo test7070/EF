@@ -1021,37 +1021,29 @@
                         <td></td>
                         <td class="tdZ"></td>
                     </tr>
+                    到店運費	EC件數	EC運費	膠外件數	膠外運費
+
+
                     <tr style="background:#868A08;">
-                        <td><span> </span><a class="lbl">單店運費</a></td>
-                        <td><input id="txtValue7"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">共配運費</a></td>
-                        <td><input id="txtValue8"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">共配店數</a></td>
-                        <td><input id="txtValue9"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">專車店數</a></td>
-                        <td><input id="txtValue10"  type="text" class="txt c1 num"/></td>
-                        <td class="tdZ"></td>
-                    </tr>
-                    <tr style="background:#868A08;">
-                        <td><span> </span><a class="lbl">常溫未訂店數</a></td>
-                        <td><input id="txtValue11"  type="text" class="txt c1 num"/></td>
                         <td><span> </span><a class="lbl">到店運費</a></td>
-                        <td><input id="txtValue12"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">EC件數</a></td>
-                        <td><input id="txtValue13"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">EC運費</a></td>
-                        <td><input id="txtValue14"  type="text" class="txt c1 num"/></td>
+                        <td><input id="txtValue7"  type="text" class="txt c1 num"/></td>
+                        <td> </td>
+                        <td> </td>
+                        <td> </td>
+                        <td> </td>
+                        <td> </td>
+                        <td> </td>
                         <td class="tdZ"></td>
                     </tr>
                     <tr style="background:#868A08;">
+                    	<td><span> </span><a class="lbl">EC件數</a></td>
+                        <td><input id="txtValue8"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">EC運費</a></td>
+                        <td><input id="txtValue9"  type="text" class="txt c1 num"/></td>
                         <td><span> </span><a class="lbl">膠外件數</a></td>
-                        <td><input id="txtValue15"  type="text" class="txt c1 num"/></td>
+                        <td><input id="txtValue10"  type="text" class="txt c1 num"/></td>
                         <td><span> </span><a class="lbl">膠外運費</a></td>
-                        <td><input id="txtValue16"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">配送籃數</a></td>
-                        <td><input id="txtValue17"  type="text" class="txt c1 num"/></td>
-                        <td> </td>
-                        <td> </td>
+                        <td><input id="txtValue11"  type="text" class="txt c1 num"/></td>
                         <td class="tdZ"></td>
                     </tr>
                     <tr>
@@ -1075,6 +1067,11 @@
                             <input id="txtPrice2"  type="text" class="txt c1 num"/>
                             <input id="txtPrice3"  type="text" class="txt c1 num"/>
                         </td>
+                        <td><span> </span><a class="lbl">路線</a></td>
+                        <td>
+                            <input id="txtCaseno"  type="text" style="float:left;width:50%;"/>
+                            <input id="txtCaseno2"  type="text" style="float:left;width:50%;"/>
+                        </td>
                     </tr>
                    
                     <tr style="display:none;">
@@ -1088,13 +1085,6 @@
                         <td colspan="3">
                             <input id="txtUccno"  type="text" style="float:left;width:30%;"/>
                             <input id="txtProduct"  type="text" style="float:left;width:70%;"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><span> </span><a id="lblCaseno" class="lbl"> </a></td>
-                        <td colspan="3">
-                            <input id="txtCaseno"  type="text" style="float:left;width:50%;"/>
-                            <input id="txtCaseno2"  type="text" style="float:left;width:50%;"/>
                         </td>
                     </tr>
                     <tr style="display:none;">
