@@ -128,6 +128,12 @@
                         dbf : 'tgg',
                         index : 'noa,comp',
                         src : 'tgg_b.aspx'
+                    }, {/*15-[22]-文流  路線*/
+                        type : '6',
+                        name : 'caseno'
+                    }, {/*16-[22]-文流  門市運費性質*/
+                        type : '6',
+                        name : 'casecustno'
                     }]
                 });
                 q_popAssign();
