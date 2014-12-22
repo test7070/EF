@@ -367,10 +367,10 @@
                     <td align="center" style="width:80px;">日期</td>
                     <td align="center" style="width:150px;">客戶</td>
                    	<td align="center" style="width:80px;">項目</td>
-                   	<td align="center" style="width:80px;">收入(峻富)</td>
-                   	<td align="center" style="width:80px;">模組一自有車</td>
-                   	<td align="center" style="width:80px;">模組二外車</td>
-                   	<td align="center" style="width:80px;">模組三靠行車</td>
+                   	<td align="center" style="width:80px;">峻富收入</td>
+                   	<td align="center" style="width:80px;">峻富支出<BR>對行<BR>(模組一)</td>
+                   	<td align="center" style="width:80px;">峻富支出<BR>對個人車<BR>(模組二)</td>
+                   	<td align="center" style="width:80px;">峻富支出<BR>對新竹物流及自有車<BR>(模組三)</td>
                    	<td align="center" style="width:80px;">備註</td>
                 </tr>
                 <tr  style='background:#cad3ff;'>

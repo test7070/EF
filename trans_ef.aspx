@@ -237,13 +237,6 @@
                     }
                     $(this).data('curValue',$(this).val());
                 });
-                //櫃號異常就變色
-                $('#txtCaseno').change(function(e){
-                    $(this).css('color',$.trim($(this).val()).length==0||checkCaseno($.trim($(this).val()))?'black':'darkred');
-                });
-                $('#txtCaseno2').change(function(e){
-                    $(this).css('color',$.trim($(this).val()).length==0||checkCaseno($.trim($(this).val()))?'black':'darkred');
-                });
                 $('#txtPrice').change(function(){
                     sum();
                 });
@@ -597,8 +590,6 @@
             function refresh(recno) {
                 _refresh(recno);
                 trans.refresh();
-                $('#txtCaseno').css('color',$.trim($('#txtCaseno').val()).length==0||checkCaseno($.trim($('#txtCaseno').val()))?'black':'darkred');
-                $('#txtCaseno2').css('color',$.trim($('#txtCaseno2').val()).length==0||checkCaseno($.trim($('#txtCaseno2').val()))?'black':'darkred');
                 
                 if($('#cmbCarteamno').val()=='10'){
                     //B段
@@ -1021,14 +1012,11 @@
                         <td></td>
                         <td class="tdZ"></td>
                     </tr>
-                    到店運費	EC件數	EC運費	膠外件數	膠外運費
-
-
                     <tr style="background:#868A08;">
                         <td><span> </span><a class="lbl">到店運費</a></td>
                         <td><input id="txtValue7"  type="text" class="txt c1 num"/></td>
-                        <td> </td>
-                        <td> </td>
+                        <td><span> </span><a class="lbl">特殊點加價</a></td>
+                        <td><input id="txtValue12"  type="text" class="txt c1 num"/></td>
                         <td> </td>
                         <td> </td>
                         <td> </td>
