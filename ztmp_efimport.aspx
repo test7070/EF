@@ -208,7 +208,7 @@
 			function _btnSeek() {
 				if (q_cur > 0 && q_cur < 4)
 					return;
-				q_box('ztmp_efimport_s.aspx', q_name + '_s', "500px", "330px", q_getMsg("popSeek"));
+				q_box('ztmp_efimport_s.aspx', q_name + '_s', "500px", "400px", q_getMsg("popSeek"));
 			}
 			function bbsAssign() {
 				for (var i = 0; i < q_bbsCount; i++) {
@@ -236,7 +236,7 @@
 				$('#txtNote_date').focus();
 			}
 			function btnPrint() {
-				q_box("z_ztmp_efimport.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";;" + r_accy, 'z_addr', "95%", "95%", q_getMsg("popPrint"));
+				q_box("z_orde_ef.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";;" + r_accy, 'z_addr', "95%", "95%", q_getMsg("popPrint"));
 			}
 			function wrServer(key_value) {
 				var i;

@@ -42,7 +42,7 @@
             //DC2.ConnectionString  峻富資料庫連接字串
             //CST.ConnectionString  正新資料庫連接字串
             string CSTConnectionString = "Provider=msdaora;Data Source=203.75.57.25;Persist Security Info=True;User ID=GF;Password=CSTGF;Unicode=True";
-            string DC2ConnectionString = "Data Source=59.125.143.171,1799;Persist Security Info=True;User ID=sa;Password=artsql963;Database=DC";
+            string DC2ConnectionString = "Data Source=59.125.143.171,1799;Persist Security Info=True;User ID=sa;Password=artsql963;Database=DC2";
             //抓資料
             System.Data.DataTable dc2 = new System.Data.DataTable();
             System.Data.DataTable dc2s = new System.Data.DataTable();
