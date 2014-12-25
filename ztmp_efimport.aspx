@@ -17,7 +17,7 @@
         	
 			q_tables = 's';
 			var q_name = "ztmp_efimport";
-			var q_readonly = ['txtNoa','txtSeq_no'];
+			var q_readonly = ['txtNoa','txtSeq_no','chkIs_read','chkIs_del'];
 			var q_readonlys = ['txtSeq_no','txtTd_no','txtSeq','txtNeed_date','txtNeed_time','txtDestination'];
 			var bbmNum = [];
 			var bbsNum = [];
@@ -61,6 +61,16 @@
 				q_getFormat();
 				q_mask(bbmMask);
 				q_cmbParse("cmbOrder_type", "1@進口");
+				
+				$('#buttonDel').click(function(e){
+					var t_noa = abbm[q_recno].noa;
+					if(t_noa.length==0)
+						return;
+					if (confirm("是否作廢電腦編號【"+t_noa+"】")) {
+						Lock(1,{opacity:0});
+            			DeleteCST(t_noa);
+            		}
+				});
 			}
 			function q_boxClose(s2) {
 				var ret;
@@ -79,12 +89,101 @@
 						break;
 				}
 			}
+			function DeleteCST(t_noa){
+				//is_del 改為1
+				$.ajax({
+                    url: 'ef_CST.aspx',
+                    type: 'POST',
+                    data: JSON.stringify({noa:t_noa,action:"delete"}),
+                    dataType: 'text',
+                    timeout: 5000,
+                    success: function(data){
+                        if(data.toLowerCase()=="done"){
+                        	abbm[q_recno].is_del=="true";
+                        	$('#chkIs_del').prop('checked',true);
+                        	$('#vtxdel_'+q_recno).text('*');
+                        }else{
+                        	alert(data);
+                        }
+                    },
+                    complete: function(){ 
+                    	Unlock(1);//解除鎖定                   
+                    },
+                    error: function(jqXHR, exception) {
+                        var errmsg = '';
+                        if (jqXHR.status === 0) {
+                            alert(errmsg+'Not connect.\n Verify Network.');
+                        } else if (jqXHR.status == 404) {
+                            alert(errmsg+'Requested page not found. [404]');
+                        } else if (jqXHR.status == 500) {
+                            alert(errmsg+'Internal Server Error [500].');
+                        } else if (exception === 'parsererror') {
+                            alert(errmsg+'Requested JSON parse failed.');
+                        } else if (exception === 'timeout') {
+                            alert(errmsg+'Time out error.');
+                        } else if (exception === 'abort') {
+                            alert(errmsg+'Ajax request aborted.');
+                        } else {
+                            alert(errmsg+'Uncaught Error.\n' + jqXHR.responseText);
+                        }
+                    }
+                });
+			}
+			function InsertCST(t_noa){
+				$.ajax({
+                    url: 'ef_CST.aspx',
+                    type: 'POST',
+                    data: JSON.stringify({noa:t_noa,action:"insert"}),
+                    dataType: 'text',
+                    timeout: 5000,
+                    success: function(data){
+                        if(data.toLowerCase().substring(0,5)=="done:"){
+                        	var seq_no = data.toLowerCase().replace('done:','');
+                        	abbm[q_recno].seq_no = seq_no;
+                        	for(var i=0;i<abbs.length;i++){
+                        		abbs[i].seq_no = seq_no;
+                        	}
+                        	$('#txtSeq_no').val(seq_no);
+                        	for(var i=0;i<q_bbsCount;i++){
+                        		$('#txtSeq_no_'+i).val(seq_no);
+                        	}
+                        }else{
+                        	alert(data);
+                        }
+                    },
+                    complete: function(){ 
+                    	Unlock(1);//解除btnOk的鎖定                   
+                    },
+                    error: function(jqXHR, exception) {
+                        var errmsg = '';
+                        if (jqXHR.status === 0) {
+                            alert(errmsg+'Not connect.\n Verify Network.');
+                        } else if (jqXHR.status == 404) {
+                            alert(errmsg+'Requested page not found. [404]');
+                        } else if (jqXHR.status == 500) {
+                            alert(errmsg+'Internal Server Error [500].');
+                        } else if (exception === 'parsererror') {
+                            alert(errmsg+'Requested JSON parse failed.');
+                        } else if (exception === 'timeout') {
+                            alert(errmsg+'Time out error.');
+                        } else if (exception === 'abort') {
+                            alert(errmsg+'Ajax request aborted.');
+                        } else {
+                            alert(errmsg+'Uncaught Error.\n' + jqXHR.responseText);
+                        }
+                    }
+                });
+			}
 			function q_stPost() {
 				if (!(q_cur == 1 || q_cur == 2))
 					return false;
 				$('#vtxread_'+q_recno).text(abbm[q_recno].is_read=="true"?'*':'');
 				$('#vtxdel_'+q_recno).text(abbm[q_recno].is_del=="true"?'*':'');
-				Unlock(1);
+				if(q_cur==1){
+					InsertCST(abbm[q_recno].noa);//寫入正新資料庫
+				}else{
+					Unlock(1);//解除btnOk的鎖定
+				}
 			}
 			function btnOk() {
 				Lock(1,{opacity:0});
@@ -130,6 +229,7 @@
 				$('#txtOrder_date').focus();
 			}
 			function btnModi() {
+				alert('【修改】不會更新資料至正新!');
 				if (emp($('#txtNoa').val()))
 					return;
 				_btnModi();
@@ -162,9 +262,11 @@
 				if (t_para) {
                     $('#txtOrder_date').datepicker('destroy');
                     $('#txtGet_deadline').datepicker('destroy');
+                    $('#buttonDel').removeAttr('disabled');
                 } else {	
                     $('#txtOrder_date').datepicker({dateFormat: 'yy/mm/dd'});
                     $('#txtGet_deadline').datepicker({dateFormat: 'yy/mm/dd'});
+                    $('#buttonDel').attr('disabled','disabled');
                 }
 			}
 			function btnMinus(id) {
@@ -201,6 +303,7 @@
 				_q_brwAssign(s1);
 			}
 			function btnDele() {
+				alert('【刪除】不會同步刪除正新的資料!');
 				_btnDele();
 			}
 			function btnCancel() {
@@ -393,6 +496,8 @@
                         <td><input id="chkIs_read" type="checkbox" class="txt c1" /></td>
                         <td><span> </span><a id='lblIs_del' class="lbl">作廢</a></td>
                         <td><input id="chkIs_del" type="checkbox" class="txt c1" /></td>
+                        <td> </td>
+                        <td><input type="button" id="buttonDel" value="作廢"/></td>
                 	</tr>
                 </table>
             </div>
