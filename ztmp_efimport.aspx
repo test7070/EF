@@ -131,6 +131,7 @@
 			}
 			function InsertCST(t_noa){
 				$.ajax({
+					noa: t_noa,
                     url: 'ef_CST.aspx',
                     type: 'POST',
                     data: JSON.stringify({noa:t_noa,action:"insert"}),
@@ -141,7 +142,8 @@
                         	var seq_no = data.toLowerCase().replace('done:','');
                         	abbm[q_recno].seq_no = seq_no;
                         	for(var i=0;i<abbs.length;i++){
-                        		abbs[i].seq_no = seq_no;
+                        		if(abbs[i].noa == this.noa)
+                        			abbs[i].seq_no = seq_no;
                         	}
                         	$('#txtSeq_no').val(seq_no);
                         	for(var i=0;i<q_bbsCount;i++){
