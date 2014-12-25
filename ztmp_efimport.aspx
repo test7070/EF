@@ -55,7 +55,7 @@
 					dataErr = false;
 					return;
 				}
-				mainForm(0);
+				mainForm(1);
 			}
 			function mainPost() {
 				q_getFormat();
