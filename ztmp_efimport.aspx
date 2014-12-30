@@ -176,6 +176,43 @@
                     }
                 });
 			}
+			function UpdateCST(t_noa){
+				$.ajax({
+					noa: t_noa,
+                    url: 'ef_CST.aspx',
+                    type: 'POST',
+                    data: JSON.stringify({noa:t_noa,action:"update"}),
+                    dataType: 'text',
+                    timeout: 5000,
+                    success: function(data){
+                        if(data.toLowerCase().substring(0,5)=="done:"){
+                        }else{
+                        	alert(data);
+                        }
+                    },
+                    complete: function(){ 
+                    	Unlock(1);//解除btnOk的鎖定                   
+                    },
+                    error: function(jqXHR, exception) {
+                        var errmsg = '';
+                        if (jqXHR.status === 0) {
+                            alert(errmsg+'Not connect.\n Verify Network.');
+                        } else if (jqXHR.status == 404) {
+                            alert(errmsg+'Requested page not found. [404]');
+                        } else if (jqXHR.status == 500) {
+                            alert(errmsg+'Internal Server Error [500].');
+                        } else if (exception === 'parsererror') {
+                            alert(errmsg+'Requested JSON parse failed.');
+                        } else if (exception === 'timeout') {
+                            alert(errmsg+'Time out error.');
+                        } else if (exception === 'abort') {
+                            alert(errmsg+'Ajax request aborted.');
+                        } else {
+                            alert(errmsg+'Uncaught Error.\n' + jqXHR.responseText);
+                        }
+                    }
+                });
+			}
 			function q_stPost() {
 				if (!(q_cur == 1 || q_cur == 2))
 					return false;
@@ -183,6 +220,8 @@
 				$('#vtxdel_'+q_recno).text(abbm[q_recno].is_del=="true"?'*':'');
 				if(q_cur==1){
 					InsertCST(abbm[q_recno].noa);//寫入正新資料庫
+				}else if(q_cur==2){
+					UpdateCST(abbm[q_recno].noa);//寫入正新資料庫
 				}else{
 					Unlock(1);//解除btnOk的鎖定
 				}
@@ -231,7 +270,7 @@
 				$('#txtOrder_date').focus();
 			}
 			function btnModi() {
-				alert('【修改】不會更新資料至正新!');
+				alert('【修改】只會更新領櫃地、備註至正新!');
 				if (emp($('#txtNoa').val()))
 					return;
 				_btnModi();
