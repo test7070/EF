@@ -231,7 +231,7 @@
 	>
 		<div id="q_menu"></div>
 		<div style="position: absolute;top: 10px;left:50px;z-index: 1;width:2000px;">
-		    <input type="button" id="btnTrans_sum" value="分析表資料結轉"/>
+		    <input type="button" id="btnTrans_sum" value="分析表資料結轉" style="display:none;"/>
 			<div id="container">
 				<div id="q_report"></div>
 			</div>
