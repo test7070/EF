@@ -486,7 +486,7 @@
                 sum();
             }
             function btnPrint() {
-                q_box('z_transef.aspx' + "?;;;;" + r_accy, '', "95%", "95%", q_getMsg("popPrint"));
+                q_box('z_tran_ef.aspx' + "?;;;;" + r_accy, '', "95%", "95%", q_getMsg("popPrint"));
             }
             function q_stPost() {
                 if (!(q_cur == 1 || q_cur == 2))
@@ -888,13 +888,13 @@
                         <td><input id="txtDatea"  type="text" class="txt c1"/></td>
                         <td><span> </span><a class="lbl">配送日期</a></td>
                         <td><input id="txtTrandate"  type="text" class="txt c1"/></td>
-                        <td><span> </span><a id="lblCalctype" class="lbl"> </a></td>
+                        <td><span> </span><a id="lblCalctype" class="lbl">計算類別</a></td>
                         <td><select id="cmbCalctype" class="txt c1"> </select></td>
-                        <td><span> </span><a id="lblCarteam" class="lbl"> </a></td>
+                        <td><span> </span><a id="lblCarteam" class="lbl">車隊</a></td>
                         <td><select id="cmbCarteamno" class="txt c1"> </select></td>
                     </tr>
                     <tr>
-                        <td><span> </span><a id="lblCust" class="lbl btn"> </a></td>
+                        <td><span> </span><a id="lblCust" class="lbl btn">客戶</a></td>
                         <td colspan="3">
                             <input id="txtCustno"  type="text" style="float:left;width:30%;"/>
                             <input id="txtComp"  type="text" style="float:left;width:70%;"/>
@@ -934,12 +934,12 @@
                     </tr>
                     
                     <tr>
-                        <td><span> </span><a id="lblStraddr_tb" class="lbl btn"> </a></td>
+                        <td><span> </span><a id="lblStraddr_tb" class="lbl btn">起點</a></td>
                         <td colspan="2">
                             <input id="txtStraddrno"  type="text" style="float:left;width:30%;"/>
                             <input id="txtStraddr"  type="text" style="float:left;width:70%;"/>
                         </td>
-                        <td><span> </span><a id="lblEndaddr_tb" class="lbl btn"> </a></td>
+                        <td><span> </span><a id="lblEndaddr_tb" class="lbl btn">迄點</a></td>
                         <td colspan="2">
                             <input id="txtEndaddrno"  type="text" style="float:left;width:30%;"/>
                             <input id="txtEndaddr"  type="text" style="float:left;width:70%;"/>
@@ -1040,9 +1040,9 @@
                             <input id="txtTggno"  type="text" style="float:left;width:50%;"/>
                             <input id="txtTgg"  type="text" style="float:left;width:50%;"/>
                         </td>
-                        <td><span> </span><a id="lblCarno" class="lbl btn"> </a></td>
+                        <td><span> </span><a id="lblCarno" class="lbl btn">車牌</a></td>
                         <td><input id="txtCarno"  type="text" class="txt c1"/></td>
-                        <td><span> </span><a id="lblDriver" class="lbl btn"> </a></td>
+                        <td><span> </span><a id="lblDriver" class="lbl btn">司機</a></td>
                         <td colspan="2">
                             <input id="txtDriverno"  type="text" style="float:left;width:50%;"/>
                             <input id="txtDriver"  type="text" style="float:left;width:50%;"/>
@@ -1097,22 +1097,22 @@
                         <td><input id="txtGps"  type="text" class="txt c1 num"/></td>
                     </tr>
                     <tr>
-                        <td><span> </span><a id="lblMemo" class="lbl"> </a></td>
+                        <td><span> </span><a id="lblMemo" class="lbl">備註</a></td>
                         <td colspan="7"><input id="txtMemo"  type="text" class="txt c1"/></td>
                     </tr>
                     <tr>
-                        <td><span> </span><a id="lblNoa" class="lbl"> </a></td>
+                        <td><span> </span><a id="lblNoa" class="lbl">電腦編號</a></td>
                         <td>
                             <input id="txtNoa"  type="text" class="txt c1"/>
                             <input id="txtNoq"  type="text" style="display:none;"/>
                         </td>
-                        <td><span> </span><a id="lblOrdeno" class="lbl"> </a></td>
+                        <td><span> </span><a id="lblOrdeno" class="lbl">訂單號碼</a></td>
                         <td colspan="2"><input id="txtOrdeno"  type="text" class="txt c1"/></td>
                     </tr>
                     <tr>
-                        <td><span> </span><a id="lblWorker" class="lbl"> </a></td>
+                        <td><span> </span><a id="lblWorker" class="lbl">製單員</a></td>
                         <td><input id="txtWorker" type="text" class="txt c1"/></td>
-                        <td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
+                        <td><span> </span><a id="lblWorker2" class="lbl">修改人</a></td>
                         <td><input id="txtWorker2" type="text" class="txt c1"/></td>
                     </tr>
                 </table>
