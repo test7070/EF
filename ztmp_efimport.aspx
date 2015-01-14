@@ -357,7 +357,7 @@
             }
             .dview {
                 float: left;
-                width: 300px;
+                width: 400px;
                 border-width: 0px;
             }
             .tview {
@@ -474,7 +474,7 @@
                     <tr>
                         <td align="center" style="width:20px; color:black;"><a id='vewChk'> </a></td>
                         <td align="center" style="width:100px; color:black;"><a id='vewOrder_date'>訂單日期</a></td>
-                        <td align="center" style="width:100px; color:black;"><a id='vewTd_no'>進口單號</a></td>
+                        <td align="center" style="width:200px; color:black;"><a id='vewTd_no'>進口單號</a></td>
                         <td align="center" style="width:20px; color:black;"><a id='vewXread'>已讀</a></td>
                         <td align="center" style="width:20px; color:black;"><a id='vewXdel'>作廢</a></td>
                     </tr>
