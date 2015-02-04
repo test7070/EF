@@ -26,8 +26,7 @@
                 ,['txtOverw',10,0,1],['txtCommission',10,0,1],['txtCommission2',10,0,1]
                 ,['txtUnpack',10,0,1],['txtMount3',10,0,1],['txtMount4',10,0,1]
                 ,['txtWeight2',10,0,1],['txtWeight3',10,0,1]
-                ,['txtValue1',10,0,1],['txtValue2',10,0,1],['txtValue3',10,0,1]
-                ,['txtValue4',10,0,1],['txtValue5',10,0,1],['txtValue6',10,0,1]];
+                ,['txtValue1',10,0,1],['txtValue2',10,0,1]];
             var bbmMask = [];
             q_sqlCount = 6;
            
@@ -915,6 +914,8 @@
                         </td>
                         <td><span> </span><a id="lblPton_ef" class="lbl">板數</a></td>
                         <td><input id="txtPton"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">報單編號</a></td>
+                        <td><input id="txtSo"  type="text" class="txt c1"/></td>
                     </tr>
                     <tr>
                         <td><span> </span><a class="lbl">寄件人</a></td>
@@ -944,6 +945,14 @@
                             <input id="txtEndaddrno"  type="text" style="float:left;width:30%;"/>
                             <input id="txtEndaddr"  type="text" style="float:left;width:70%;"/>
                         </td>
+                        <td><span> </span><a class="lbl">卸櫃地</a></td>
+                        <td><input id="txtCaseend" type="text" class="txt c1"/></td>
+                    </tr>
+                    <tr>
+                        <td><span> </span><a id="lblBmiles" class="lbl">里程起</a></td>
+                        <td><input id="txtBmiles"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a id="lblEmiles" class="lbl">里程迄</a></td>
+                        <td><input id="txtEmiles"  type="text" class="txt c1 num"/></td>
                         <td><span> </span><a class="lbl">行駛里程數</a></td>
                         <td><input id="txtMiles"  type="text" class="txt c1 num"/></td>
                     </tr>
@@ -991,25 +1000,25 @@
                         <td class="tdZ"></td>
                     </tr>                   
                     <tr style="background:burlywood;">
-                        <td><span> </span><a class="lbl">領櫃</a></td>
-                        <td><input id="txtValue2"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">送櫃 </a></td>
-                        <td><input id="txtValue3"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">收櫃</a></td>
-                        <td><input id="txtValue4"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a class="lbl">交櫃</a></td>
-                        <td><input id="txtValue5"  type="text" class="txt c1 num"/></td>
-                        <td class="tdZ"></td>
-                    </tr>        
-                    <tr style="background:burlywood;">
-                        <td><span> </span><a class="lbl">油量</a></td>
-                        <td><input id="txtValue1"  type="text" class="txt c1 num"/></td>
                         <td><span> </span><a class="lbl">板架</a></td>
                         <td><input id="txtCardno"  type="text" class="txt c1"/></td>
-                        <td><span> </span><a class="lbl">定價金額</a></td>
-                        <td><input id="txtValue6"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">加油公升數</a></td>
+                        <td><input id="txtValue1"  type="text" class="txt c1 num"/></td>
+                        <td><span> </span><a class="lbl">油費</a></td>
+                        <td><input id="txtValue2"  type="text" class="txt c1 num"/></td>
                         <td></td>
                         <td></td>
+                        <td class="tdZ"></td>
+                    </tr>
+                    <tr style="background:burlywood;">
+                    	<td><span> </span><a class="lbl">尺寸</a></td>
+                        <td><input id="txtCstype"  type="text" class="txt c1"/></td>
+                        <td><span> </span><a class="lbl">代碼</a></td>
+                        <td><input id="txtStatus"  type="text" class="txt c1"/></td>
+                        <td><span> </span><a class="lbl">進出空重</a></td>
+                        <td><input id="txtFill"  type="text" class="txt c1"/></td>
+                        <td><span> </span><a class="lbl">稅內含</a></td>
+                        <td><input id="txtIo"  type="text" class="txt c1"/></td>
                         <td class="tdZ"></td>
                     </tr>
                     <tr style="background:#868A08;">
@@ -1056,7 +1065,7 @@
                             <input id="txtPrice3"  type="text" class="txt c1 num"/>
                         </td>
                         <td><span> </span><a class="lbl">路線</a></td>
-                        <td>
+                        <td colspan="2">
                             <input id="txtCaseno"  type="text" style="float:left;width:50%;"/>
                             <input id="txtCaseno2"  type="text" style="float:left;width:50%;"/>
                         </td>
@@ -1087,15 +1096,10 @@
                     <tr style="display:none;">
                         <td><span> </span><a id="lblCustorde" class="lbl"> </a></td>
                         <td colspan="2"><input id="txtCustorde" type="text" class="txt c1"/></td>
-                    </tr>
-                    <tr style="display:none;">
-                        <td><span> </span><a id="lblBmiles" class="lbl"> </a></td>
-                        <td><input id="txtBmiles"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a id="lblEmiles" class="lbl"> </a></td>
-                        <td><input id="txtEmiles"  type="text" class="txt c1 num"/></td>
-                        <td><span> </span><a id="lblGps" class="lbl"> </a></td>
+                   		<td><span> </span><a id="lblGps" class="lbl"> </a></td>
                         <td><input id="txtGps"  type="text" class="txt c1 num"/></td>
                     </tr>
+                    
                     <tr>
                         <td><span> </span><a id="lblMemo" class="lbl">備註</a></td>
                         <td colspan="7"><input id="txtMemo"  type="text" class="txt c1"/></td>
