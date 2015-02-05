@@ -93,6 +93,7 @@
 				//is_del 改為1
 				$.ajax({
                     url: 'ef_CST.aspx',
+                    headers: { 'database': q_db},
                     type: 'POST',
                     data: JSON.stringify({noa:t_noa,action:"delete"}),
                     dataType: 'text',

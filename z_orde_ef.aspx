@@ -73,6 +73,7 @@
                 	$.ajax({
 						url : 'getorde_ct.aspx'
 						, type : 'POST'
+						,headers: { 'database': q_db}
 						, data : JSON.stringify({bdate:t_bdate ,edate:t_edate })
 						, dataType : 'text'
 						, timeout : 0
