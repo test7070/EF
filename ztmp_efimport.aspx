@@ -228,6 +228,15 @@
 				}
 			}
 			function btnOk() {
+				if($('#txtOrder_date').val().length==0){
+					alert('請輸入訂單日期');
+					return;
+				}
+				if($('#txtGet_deadline').val().length==0){
+					alert('請輸入領櫃期限');
+					return;
+				}	
+				
 				Lock(1,{opacity:0});
 				var max = 0;
 				for(var i=0;i<q_bbsCount;i++){
