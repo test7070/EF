@@ -421,8 +421,13 @@
                             $("#cmbCarteamno").val(abbm[q_recno].carteamno);  
                         if(r_rank>=8)
 	                		q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
-	                	else
-	                		q_gt(q_name, "where=^^worker='"+r_name+"'^^", q_sqlCount, 1, 0, '', r_accy);
+	                	else{
+	                		if(q_getHref()[0]=="noa")
+	                			q_gt(q_name, "where=^^worker='"+r_name+"' and noa='"+q_getHref()[1]+"'^^", q_sqlCount, 1, 0, '', r_accy);
+	                		else
+	                			q_gt(q_name, "where=^^worker='"+r_name+"'^^", q_sqlCount, 1, 0, '', r_accy);
+	                	}
+	                		
                         break;
                     case q_name:
                         if (q_cur == 4)
