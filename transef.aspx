@@ -43,16 +43,7 @@
                 string = string.replace(/.*\'all\'=\'all\' and (\d*)=\d*.*/g,'$1');
                 brwCount2 = parseInt(string);
             }
-            aPop = new Array(['txtStraddrno','lblStraddr_tb','addr2','noa,addr','txtStraddrno,txtStraddr','addr2_b.aspx']
-                ,['txtEndaddrno','lblEndaddr_tb','addr2','noa,addr','txtEndaddrno,txtEndaddr','addr2_b.aspx']
-                ,['txtUccno','lblUcc','ucc','noa,product','txtUccno,txtProduct','ucc_b.aspx']
-                ,['txtCustno', 'lblCust', 'cust', 'noa,comp,nick', 'txtCustno,txtComp,txtNick', 'cust_b.aspx']
-                ,['txtDriverno', 'lblDriver', 'driver', 'noa,namea', 'txtDriverno,txtDriver', 'driver_b.aspx']
-                ,['txtCarno', 'lblCarno', 'car2', 'a.noa,driver,driverno', 'txtCarno,txtDriver,txtDriverno', 'car2_b.aspx']
-                ,['txtBoatno', 'lblBoat', 'boat', 'noa,boat', 'txtBoatno,txtBoat', 'boat_b.aspx']
-                ,['txtTggno', 'lblTggno', 'tgg', 'noa,comp', 'txtTggno,txtTgg', 'tgg_b.aspx']
-                ,['txtSaddr', '', 'view_road', 'memo', '0txtSaddr', 'road_b.aspx']
-                ,['txtAaddr', '', 'view_road', 'memo', '0txtAaddr', 'road_b.aspx']);
+            aPop = new Array();
            
             function sum() {
                 if(q_cur!=1 && q_cur!=2)
@@ -428,12 +419,24 @@
                         }
                         if(abbm[q_recno]!=undefined)
                             $("#cmbCarteamno").val(abbm[q_recno].carteamno);  
-                            
-                        q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
+                        if(r_rank>=8)
+	                		q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
+	                	else
+	                		q_gt(q_name, "where=^^worker='"+r_name+"'^^", q_sqlCount, 1, 0, '', r_accy);
                         break;
                     case q_name:
                         if (q_cur == 4)
                             q_Seek_gtPost();
+                        aPop = new Array(['txtStraddrno','lblStraddr_tb','addr2','noa,addr','txtStraddrno,txtStraddr','addr2_b.aspx']
+			                ,['txtEndaddrno','lblEndaddr_tb','addr2','noa,addr','txtEndaddrno,txtEndaddr','addr2_b.aspx']
+			                ,['txtUccno','lblUcc','ucc','noa,product','txtUccno,txtProduct','ucc_b.aspx']
+			                ,['txtCustno', 'lblCust', 'cust', 'noa,comp,nick', 'txtCustno,txtComp,txtNick', 'cust_b.aspx','','',"where=^^worker=~#$"+r_name+"~#$^^"]
+			                ,['txtDriverno', 'lblDriver', 'driver', 'noa,namea', 'txtDriverno,txtDriver', 'driver_b.aspx']
+			                ,['txtCarno', 'lblCarno', 'car2', 'a.noa,driver,driverno', 'txtCarno,txtDriver,txtDriverno', 'car2_b.aspx']
+			                ,['txtBoatno', 'lblBoat', 'boat', 'noa,boat', 'txtBoatno,txtBoat', 'boat_b.aspx']
+			                ,['txtTggno', 'lblTggno', 'tgg', 'noa,comp', 'txtTggno,txtTgg', 'tgg_b.aspx']
+			                ,['txtSaddr', '', 'view_road', 'memo', '0txtSaddr', 'road_b.aspx']
+			                ,['txtAaddr', '', 'view_road', 'memo', '0txtAaddr', 'road_b.aspx']);
                         break;
                     default:
                        
