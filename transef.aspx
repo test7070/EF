@@ -345,7 +345,63 @@
             }
 
             function q_gtPost(t_name) {
-                switch (t_name) { 
+                switch (t_name) {
+                	case 'getChange':
+                		//記錄欄位原本的文字顏色      &  還原原本的顏色
+                		var obj = $('body').find('input[type="text"],select');
+                		for(var i=0;i<obj.length;i++){
+                			if(obj.eq(i).attr('id').substring(0,3)=='txt' || obj.eq(i).attr('id').substring(0,3)=='cmb')
+	                			if(obj.eq(i).data('orgColor')==undefined)		
+	                				obj.eq(i).data('orgColor',obj.eq(i).css('color'));
+	                			else{
+	                				obj.eq(i).css('color',obj.eq(i).data('orgColor'));
+	                				obj.eq(i).attr('title','');
+	                			}
+	                				
+                		}
+                		//--------------------------------------------
+                		var as = _q_appendData("drun", "", true);
+                        if(as[0]!=undefined){
+                        	var elementList = [];
+                        	var element = new Array();
+                        	for(var i=0;i<as.length;i++){
+                        		item = as[i].memo.split('\\r\\n');
+                        		for(var j=0;j<item.length;j++){
+                        			if(item[j].indexOf(':')>=0){
+                        				field = item[j].substring(0,item[j].indexOf(':'));
+                        				item2 = item[j].substring(item[j].indexOf(':')+1,item[j].length);	
+                        				if(field.length>0){
+                        					if(elementList.indexOf(field)<0){
+                        						elementList = elementList.concat(field);
+                        						element.push([]);
+                        					}
+                        					n = elementList.indexOf(field);
+                        					
+                        					element[n]=element[n].concat({
+                        						datea : as[i].datea
+                    							,timea : as[i].timea
+                    							,memo : item2
+                    						});
+                        				}
+                        			}
+                        		}
+                        	}  
+                        	for(var i=0;i<elementList.length;i++){
+                        		field = elementList[i];
+                        		if(element[i]!=undefined){
+                        			title = '';
+                        			for(var j=0;j<element[i].length;j++){
+                        				title = title + (title.length>0?'\n':'') + element[i][j].datea+' '+element[i][j].timea+'：'+element[i][j].memo.replace('=#>',' => ');
+                        			}
+                        			fieldName = field.substring(0,1).toUpperCase()+field.substring(1,field.length); 
+                        			$('#txt'+fieldName).css('color','red');
+                        			$('#cmb'+fieldName).css('color','red'); 
+                        			$('#txt'+fieldName).attr('title',title);
+                        			$('#cmb'+fieldName).attr('title',title);
+                        		}
+                        	}	
+                        }
+                		break; 
                     case 'getPrice_driver':
                         var t_price = 0;
                         var as = _q_appendData("addrs", "", true);
@@ -419,7 +475,7 @@
                         }
                         if(abbm[q_recno]!=undefined)
                             $("#cmbCarteamno").val(abbm[q_recno].carteamno);  
-                        if(r_rank>=8)
+                        if(r_rank>=6)
 	                		q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
 	                	else{
 	                		if(q_getHref()[0]=="noa")
@@ -432,10 +488,13 @@
                     case q_name:
                         if (q_cur == 4)
                             q_Seek_gtPost();
+                        t_where = '';
+                        if(r_rank<6)
+                        	t_where = "where=^^worker=~#$"+r_name+"~#$^^";
                         aPop = new Array(['txtStraddrno','lblStraddr_tb','addr2','noa,addr','txtStraddrno,txtStraddr','addr2_b.aspx']
 			                ,['txtEndaddrno','lblEndaddr_tb','addr2','noa,addr','txtEndaddrno,txtEndaddr','addr2_b.aspx']
 			                ,['txtUccno','lblUcc','ucc','noa,product','txtUccno,txtProduct','ucc_b.aspx']
-			                ,['txtCustno', 'lblCust', 'cust', 'noa,comp,nick', 'txtCustno,txtComp,txtNick', 'cust_b.aspx','','',"where=^^worker=~#$"+r_name+"~#$^^"]
+			                ,['txtCustno', 'lblCust', 'cust', 'noa,comp,nick', 'txtCustno,txtComp,txtNick', 'cust_b.aspx','','',t_where]
 			                ,['txtDriverno', 'lblDriver', 'driver', 'noa,namea', 'txtDriverno,txtDriver', 'driver_b.aspx']
 			                ,['txtCarno', 'lblCarno', 'car2', 'a.noa,driver,driverno', 'txtCarno,txtDriver,txtDriverno', 'car2_b.aspx']
 			                ,['txtBoatno', 'lblBoat', 'boat', 'noa,boat', 'txtBoatno,txtBoat', 'boat_b.aspx']
@@ -606,9 +665,15 @@
                     $('#lblMount_ef').html('件數');
                     $('#lblPton_ef').html('板數');
                 }
-           
+                //修改過的欄位  標記-----------------------------------------
+                if($('#txtNoa').val().length>0){
+            		t_where = "where=^^action='Update' and tablea='transef' and memo like '%:%=#>%\\r\\n%' and noa='"+$('#txtNoa').val()+"' order by datea desc,timea desc^^";
+           			q_gt('drun', t_where, 0, 0, 0, 'getChange');
+            	}
+           		//-----------------------------------------------------
             }
-
+			
+			
             function readonly(t_para, empty) {
                 _readonly(t_para, empty);
             }
