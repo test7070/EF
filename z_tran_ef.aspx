@@ -134,6 +134,10 @@
                     }, {/*16-[23]-文流  門市運費性質*/
                         type : '6',
                         name : 'casecustno'
+                    },{/*[24]*/
+                        type : '0',
+                        name : 'xrank',
+                        value : r_rank
                     }]
                 });
                 q_popAssign();
