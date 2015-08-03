@@ -15,9 +15,7 @@
 		<script src="css/jquery/ui/jquery.ui.widget.js"></script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"></script>
 		<script type="text/javascript">
-			aPop = new Array(['txtXcarno', 'lblXcarno', 'car2', 'a.noa,driverno,driver', 'txtXcarno', 'car2_b.aspx']
-			,['txtCarplateno', 'lblCarplate', 'carplate', 'noa,carplate,driver', 'txtCarplateno', 'carplate_b.aspx']
-			,['txtXproductno', 'lblXproductno', 'fixucc', 'noa,namea', 'txtXproductno', 'fixucc_b.aspx']);
+			aPop = new Array(['txtXcarno', 'lblXcarno', 'car2', 'a.noa,driverno,driver', 'txtXcarno', 'car2_b.aspx']);
 			$(document).ready(function() {
 				_q_boxClose();
 				q_getId();
@@ -28,10 +26,10 @@
                     fileName : 'z_fixa_ef',
                     options : [{/*1-2 [1][2]*/
                         type : '1',
-                        name : 'date'
+                        name : 'xdate'
                     }, {/*1-3 [3]*/
                         type : '6',
-                        name : 'noa'
+                        name : 'xcarno'
                     }]
                 });
                 
@@ -39,21 +37,32 @@
 				q_getFormat();
 				q_langShow();
 				
-				$('#txtMon1').mask('999/99');
-				$('#txtMon2').mask('999/99');
-				
-				
-				$('#txtDate1').mask('999/99/99');
-                $('#txtDate1').datepicker();
-                $('#txtDate2').mask('999/99/99');
-                $('#txtDate2').datepicker();
+				$('#txtXdate1').mask('999/99/99');
+                $('#txtXdate1').datepicker();
+                $('#txtXdate2').mask('999/99/99');
+                $('#txtXdate2').datepicker();
                                
-                $('#txtDate1').val(q_date());
-				$('#txtDate2').val(q_date());             
-				
-	
-						
-				
+                var t_date, t_year, t_month, t_day;
+                t_date = new Date();
+                t_date.setDate(1);
+                t_year = t_date.getUTCFullYear() - 1911;
+                t_year = t_year > 99 ? t_year + '' : '0' + t_year;
+                t_month = t_date.getUTCMonth() + 1;
+                t_month = t_month > 9 ? t_month + '' : '0' + t_month;
+                t_day = t_date.getUTCDate();
+                t_day = t_day > 9 ? t_day + '' : '0' + t_day;
+                $('#txtXdate1').val(t_year + '/' + t_month + '/' + t_day);
+
+                t_date = new Date();
+                t_date.setDate(35);
+                t_date.setDate(0);
+                t_year = t_date.getUTCFullYear() - 1911;
+                t_year = t_year > 99 ? t_year + '' : '0' + t_year;
+                t_month = t_date.getUTCMonth() + 1;
+                t_month = t_month > 9 ? t_month + '' : '0' + t_month;
+                t_day = t_date.getUTCDate();
+                t_day = t_day > 9 ? t_day + '' : '0' + t_day;
+                $('#txtXdate2').val(t_year + '/' + t_month + '/' + t_day);          
 			}
 
 			function q_boxClose(s2) {
