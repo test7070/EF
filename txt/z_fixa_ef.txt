@@ -1,0 +1,193 @@
+z_fixa_ef01:--z_fixa_ef01
+	SET QUOTED_IDENTIFIER OFF
+	declare @t_bdate nvarchar(20) = case when '#non'=[1] then '' else [1] end
+	declare @t_edate nvarchar(20) = case when '#non'=[2] then char(255) else [2] end
+	declare @t_carno nvarchar(max) = case when '#non'=[3] then '' else [3] end
+---------------------------------------------------------------------------------------
+	declare @tmpa table(
+		carno nvarchar(20),
+		wmoney float,
+		cmoney float,
+		dmoney float,
+		emoney float,
+		oil float,
+		mile float,
+		mount float,
+		etc float
+	)
+	--維修
+	insert into @tmpa(carno,wmoney,cmoney,dmoney,emoney)
+	select isnull(carno,'')
+		,sum(isnull(wmoney,0)) wmoney
+		,sum(isnull(cmoney,0)) cmoney
+		,sum(isnull(dmoney,0)) dmoney
+		,sum(isnull(emoney,0)) emoney 
+	from fixa
+	where fixadate between @t_bdate and @t_edate
+	and (len(@t_carno)=0 or CHARINDEX(carno,','+@t_carno+',')>0)
+	group by isnull(carno,'')
+	--領料
+	insert into @tmpa(carno,wmoney,cmoney,dmoney,emoney)
+	select isnull(carno,'')
+		,sum(isnull(wmoney,0)) wmoney
+		,sum(isnull(cmoney,0)) cmoney
+		,sum(isnull(dmoney,0)) dmoney
+		,sum(isnull(emoney,0)) emoney 
+	from fixout
+	where outdate between @t_bdate and @t_edate
+	and (len(@t_carno)=0 or CHARINDEX(carno,','+@t_carno+',')>0)
+	group by isnull(carno,'')
+	--換補輪胎	
+	insert into @tmpa(carno,wmoney,cmoney,dmoney,emoney)
+	select isnull(carno,'')
+		,sum(isnull(wmoney,0)) wmoney
+		,sum(isnull(cmoney,0)) cmoney
+		,sum(isnull(dmoney,0)) dmoney
+		,sum(isnull(emoney,0)) emoney 
+	from tire
+	where datea between @t_bdate and @t_edate
+	and (len(@t_carno)=0 or CHARINDEX(carno,','+@t_carno+',')>0)
+	group by isnull(carno,'')
+	--加油
+	insert into @tmpa(carno,oil,mile,mount)
+	select isnull(carno,'')
+		,SUM(ISNULL([money],0)) [money]
+		,SUM(ISNULL([miles],0)) [miles]
+		,SUM(ISNULL([mount],0)) [mount]
+	from oil 
+	where oildate between @t_bdate and @t_edate
+	and (len(@t_carno)=0 or CHARINDEX(carno,','+@t_carno+',')>0)
+	group by isnull(carno,'')
+	--ETC
+	insert into @tmpa(carno,etc)
+	select isnull(carno,'')
+		,SUM(ISNULL([money],0)) [money]
+	from etc
+	where datea between @t_bdate and @t_edate
+	and (len(@t_carno)=0 or CHARINDEX(carno,','+@t_carno+',')>0)
+	group by isnull(carno,'')
+----------------------------------------------------------------------------------------------------------
+	declare @tmpb table(
+		gno nvarchar(20),
+		carno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		ton nvarchar(20),
+		mile float,
+		tire float,
+		fixa float,
+		oil float,
+		mount float,
+		rate float,
+		etc float,
+		[money] float,
+		aprice float
+	)	
+	insert into @tmpb(gno,carno,tire,fixa,oil,mile,mount,etc)
+	select '1',carno
+	,SUM(ISNULL(cmoney,0))
+	,SUM(ISNULL(wmoney,0)+ISNULL(dmoney,0)+ISNULL(emoney,0))
+	,SUM(ISNULL(oil,0))
+	,SUM(ISNULL(mile,0))
+	,SUM(ISNULL(mount,0)) 
+	,SUM(ISNULL(etc,0)) 
+	from @tmpa
+	group by carno
+	
+	insert into @tmpb(gno,carno,tire,fixa,oil,mile,mount,etc)
+	select '2',CHAR(255)
+	,SUM(ISNULL(cmoney,0))
+	,SUM(ISNULL(wmoney,0)+ISNULL(dmoney,0)+ISNULL(emoney,0))
+	,SUM(ISNULL(oil,0))
+	,SUM(ISNULL(mile,0))
+	,SUM(ISNULL(mount,0)) 
+	,SUM(ISNULL(etc,0)) 
+	from @tmpa
+----------------------------------------------------------------------------------------------------------	
+	update @tmpb set driverno=b.driverno,driver=c.namea,ton=b.ton
+		,[money] = tire+fixa+oil+etc
+	from @tmpb a
+	left join car2 b on a.carno=b.carno
+	left join driver c on b.driverno=c.noa
+	
+	update @tmpb set rate = case when mount!=0 then round(mile/mount,2) else 0 end
+		,aprice = case when mile!=0 then round([money]/mile,2) else 0 end
+	select *
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">日期：'+@t_bdate+' ～ '+@t_edate+'</a>' b00
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">車號</a>' b01
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">司機</a>' b02
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">噸數</a>' b03
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">本月行駛<BR>里程數</a>' b04
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">輪胎費</a>' b05
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">維修費</a>' b06
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">油料費</a>' b07
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">加油量(L)</a>' b08
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">油耗<BR>KM/L</a>' b09
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">ETAG</a>' b10
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">費用總計</a>' b11
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">公里成本<BR>KM/元</a>' b12
+		
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+carno+'</a>' a01
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+driver+'</a>' a02
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+ton+'</a>' a03
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+dbo.getComma(mile,0)+'</a>' a04
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+dbo.getComma(tire,0)+'</a>' a05
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+dbo.getComma(fixa,0)+'</a>' a06
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+dbo.getComma(oil,0)+'</a>' a07
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+dbo.getComma(mount,2)+'</a>' a08
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+dbo.getComma(rate,2)+'</a>' a09
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+dbo.getComma(etc,0)+'</a>' a10
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+dbo.getComma([money],0)+'</a>' a11
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+dbo.getComma(aprice,2)+'</a>' a12
+	from @tmpb order by gno;
+
+
+
+z_fixa_efxxxxxx01:--z_fixa_efxxxxxxx01
+declare @t_bmon nvarchar(20)
+declare @t_emon nvarchar(20)
+declare @t_noa nvarchar(10)
+
+
+set @t_bmon = case when '#non'=[1] then '' else [1] end
+set @t_emon = case when '#non'=[2] then char(255) else [2] end
+set @t_noa = case when '#non'=[3] then '' else [3] end
+
+----------------------------------------------------------------------------------------------------
+declare @tmp table(
+cnoa nvarchar(10),
+driver nvarchar(50),
+ton float,
+monmiles float,
+cmoney float,
+fmoney float,
+omoney float,
+omount float,
+etag float,
+total float,
+kmcost float
+)
+----------------------------------------------------------------------------------------------------
+insert into @tmp(cnoa,driver,cmoney,monmiles,omoney,ton,fmoney,omount,etag,total,kmcost)
+select  a.carno,b.driver,sum(b.cmoney) cmoney
+,sum(c.miles) miles,sum(c.money) omoney,sum(convert(float,a.ton)) ton,sum(b.money) fmoney,
+round(sum(c.mount),2) omount,sum(d.money) emoney,sum(b.money)+sum(d.money)+sum(c.money)+sum(b.cmoney),
+round((sum(b.money)+sum(d.money)+sum(c.money)+sum(b.cmoney))/sum(c.miles),2)
+from car2  a left join fixa  b on  a.driverno=b.driverno
+			 left join oil c on a.driverno=c.driverno
+			 left join etc d on d.carno = a.carno
+where (substring(b.fixadate,1,6) between @t_bmon and @t_emon and
+	  substring(c.oildate,1,6) between @t_bmon and @t_emon and
+	  substring(d.datea,1,6) between @t_bmon and @t_emon )and
+	  a.carno =@t_noa
+group by a.carno,b.driver
+------------------------------------------------------------------------------------------------------
+select '0' gno,cnoa c,driver,ton,
+dbo.getComma(monmiles,0) mil,dbo.getComma(cmoney,0) cm,
+dbo.getComma(fmoney,0) fm,dbo.getComma(omoney,0) omy,
+dbo.getComma(omount,0) omt,dbo.getComma(etag,0) et,
+dbo.getComma(total,0) tt,round((monmiles/omount),2) kml,kmcost
+	
+from @tmp;
+
+

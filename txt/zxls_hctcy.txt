@@ -1,0 +1,290 @@
+zxls_hctcy:--zxls_hctcy  峻富  CY	
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max)
+	declare @workerno nvarchar(max) = [1]
+	declare @worker nvarchar(max) = [2]
+	declare @filename nvarchar(max) = [3]
+	declare @curdate nvarchar(max) = convert(nvarchar,getDate(),120)
+	--------------------------------------------------------------------------------------
+	set @filename = REVERSE(replace(Upper(@filename),'HCTCY',''))
+	set @filename = REVERSE(substring(@filename,charindex('.',@filename)+1,len(@filename)))
+	--------------------------------------------------------------------------------------
+	IF OBJECT_ID('tempdb..#z_hctcy')is not null
+	BEGIN
+		drop table #z_hctcy
+	END
+
+	create table #z_hctcy(
+		isexist int,
+		accy nvarchar(10),
+		noa nvarchar(20),
+		datea nvarchar(10),
+		carteamno nvarchar(20),
+		calctype nvarchar(20),
+		so nvarchar(20),
+		sender nvarchar(20),
+		custno nvarchar(20),
+		comp nvarchar(20),
+		straddrno nvarchar(20),
+		straddr nvarchar(20),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(20),
+		caseend nvarchar(20),--卸櫃地
+		caseno nvarchar(20),
+		caseno2 nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		carno nvarchar(20),
+		cardno nvarchar(20),
+		cstype nvarchar(20),--尺寸
+		[status] nvarchar(20),--代碼
+		fill nvarchar(20),--進出空重
+		total float,
+		io nvarchar(20),--稅內含
+		total2 float,
+		bmiles float,
+		emiles float,
+		miles float,
+		value1 float,
+		value2 float,
+		price2 float,
+		price3 float,
+		memo nvarchar(max)
+	)
+	declare @a nvarchar(max)
+	declare @b nvarchar(max)
+	declare @c nvarchar(max)
+	declare @d nvarchar(max)
+	declare @e nvarchar(max)
+	declare @f nvarchar(max)
+	declare @g nvarchar(max)
+	declare @h nvarchar(max)
+	declare @i nvarchar(max)
+	declare @j nvarchar(max)
+	declare @k nvarchar(max)
+	declare @l nvarchar(max)
+	declare @m nvarchar(max)
+	declare @n nvarchar(max)
+	declare @o nvarchar(max)
+	declare @p nvarchar(max)
+	declare @q nvarchar(max)
+	declare @r nvarchar(max)
+	declare @s nvarchar(max)
+	declare @t nvarchar(max)
+	declare @u nvarchar(max)
+	declare @v nvarchar(max)
+	declare @w nvarchar(max)
+	declare @x nvarchar(max)
+	
+	-----------------------------------------------------	
+	declare @t_date date
+	declare @number nvarchar(max)
+	declare @string nvarchar(max) = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	declare @nn int
+	declare @mm nvarchar(max)
+	declare @key nvarchar(max)
+	------------------------------------------------------
+	declare @recno int
+	declare @carteamno nvarchar(20) = '13' --CY
+	declare @calctype nvarchar(20)
+	declare @so nvarchar(20)
+	declare @sender nvarchar(20)
+	declare @custno nvarchar(20)
+	declare @comp nvarchar(20)
+	declare @straddrno nvarchar(20)
+	declare @straddr nvarchar(20)
+	declare @endaddrno nvarchar(20)
+	declare @endaddr nvarchar(20)
+	declare @caseend nvarchar(20)--卸櫃地
+	declare @caseno nvarchar(20)
+	declare @caseno2 nvarchar(20)
+	declare @driverno nvarchar(20)
+	declare @driver nvarchar(20)
+	declare @carno nvarchar(20)
+	declare @cardno nvarchar(20)
+	declare @cstype nvarchar(20)--尺寸
+	declare @status nvarchar(20)--代碼
+	declare @fill nvarchar(20)--進出空重
+	declare @total float
+	declare @io nvarchar(20)--稅內含
+	declare @total2 float
+	declare @bmiles float
+	declare @emiles float
+	declare @miles float
+	declare @value1 float
+	declare @value2 float
+	declare @memo nvarchar(max)
+	
+	declare @price2 float
+	declare @price3 float
+	declare @accy nvarchar(20)
+	declare @datea nvarchar(20)
+	declare @isoutside int
+	declare @noa nvarchar(20)
+	declare @isexist int
+	------------------------------------------------------
+	declare @ddate date 
+	
+	declare cursor_table cursor for
+	select noa,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x
+	from ztmpxls 
+	where CAST(noa as int) !=1
+	order by CAST(noa as int)
+	open cursor_table
+	fetch next from cursor_table
+	into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t,@u,@v,@w,@x
+	while(@@FETCH_STATUS <> -1)
+	begin
+		--begin try
+			print @noa
+			set @datea = LEFT(@a,3)+'/'+SUBSTRING(@a,4,2)+'/'+SUBSTRING(@a,6,2)
+			set @ddate = dbo.ChineseEraName2AD(@datea)--不符合日期格式就會錯誤,跳下一筆
+			set @accy = LEFT(@a,3)
+			
+			set @so = @a
+			set @custno =''
+			set @comp =@b
+			set @sender=@c
+			set @straddr =@f
+			set @endaddr =@g
+			set @caseend =@h
+			set @caseno = @i
+			set @caseno2 = @j
+			set @driver = @k
+			set @carno = @l
+			set @cardno = @m
+			set @cstype =@n
+			set @status =@o
+			set @fill =case when left(@p,1)='-' then '' else @p end	
+			begin try
+				set @total =case when LEN(ISNULL(@q,''))=0 then 0 else cast(replace(ltrim(rtrim(@q)),',','') as float) end
+			end try
+			begin catch
+				set @total = 0
+			end catch		
+			
+			set @io=@r
+			begin try
+				set @total2=case when LEN(ISNULL(@s,''))=0 then 0 else cast(replace(ltrim(rtrim(@s)),',','') as float) end
+			end try
+			begin catch
+				set @total2 = 0
+			end catch	
+			
+			set @bmiles=case when LEN(ISNULL(@t,''))=0 then 0 else cast(replace(ltrim(rtrim(@t)),',','') as float) end
+			set @emiles=case when LEN(ISNULL(@u,''))=0 then 0 else cast(replace(ltrim(rtrim(@u)),',','') as float) end
+			begin try
+				set @miles=case when LEN(ISNULL(@v,''))=0 then 0 else cast(replace(ltrim(rtrim(@v)),',','') as float) end
+			end try
+			begin catch
+				set @miles = 0
+			end catch
+			begin try
+				if CHARINDEX('(',@w)>0
+				begin
+					set @w = LEFT(@w,CHARINDEX('(',@w)-1)
+				end
+				set @value1=case when LEN(ISNULL(@w,''))=0 then 0 else cast(replace(ltrim(rtrim(@w)),',','') as float) end
+				
+			end try
+			begin catch
+				set @value1 = 0
+			end catch
+			
+			set @value2=case when LEN(ISNULL(@x,''))=0 then 0 else cast(replace(ltrim(rtrim(@x)),',','') as float) end
+			set @memo=@curdate
+			
+			select @price2=@total,@price3=@total,@straddrno='',@endaddrno=''
+
+			select @isoutside = 1,@calctype='B01'
+			select top 1 @custno=noa from cust where charindex(@comp,comp)>0 and len(@comp)>0
+			select top 1 @driverno=noa from driver where namea=@driver and len(@driver)>0
+			select top 1 @isoutside = case when cartype='2' then 0 else 1 end from car2 where carno=@carno
+				
+			--0公司車、1外車
+			if @isoutside = 1
+				select @price2 = 0,@calctype='B01'
+			else
+				select @price3 = 0,@calctype='A01'
+				
+			set @key = @filename+RIGHT('00000'+CAST(@recno as nvarchar),5)
+			set @noa = ''
+			select @accy=accy,@noa=noa from view_transef where so=@so 
+			if(LEN(ISNULL(@noa,''))=0)
+			begin
+				set @isexist = 0
+				select top 1 @noa = noa from view_transef where noa like 'BA'+REPLACE(@datea,'/','')+'[0-9,A-Z][0-9][0-9]' order by noa desc
+				select top 1 @noa = case when noa>isnull(@noa,'') then noa else @noa end from #z_hctcy where noa like 'BA'+REPLACE(@datea,'/','')+'[0-9,A-Z][0-9][0-9]' order by noa desc
+				if LEN(ISNULL(@noa,'')) = 0
+					set @noa = 'BA'+REPLACE(@datea,'/','')+'000'
+				set @number  = right(@noa,3)				
+				set @nn = (charindex(left(@number,1),@string)-1) * 100 + cast(right(@number,2) as int) + 1
+				set @mm = substring(@string,floor(@nn/100)+1,1)
+				set @noa =  'BA'+REPLACE(@datea,'/','')+@mm+RIGHT('00'+cast(@nn as nvarchar),2)
+			end
+			else
+			begin
+				set @isexist = 1
+			end
+				insert into #z_hctcy(isexist,accy,noa,datea,carteamno,calctype,so,custno,comp,sender
+				,straddrno,straddr,endaddrno,endaddr,caseend,caseno,caseno2,driverno,driver
+				,carno,cardno,cstype,[status],fill,total,[io],total2,bmiles,emiles,miles
+				,value1,value2,memo,price2,price3)
+				select @isexist,@accy,@noa,@datea,@carteamno,@calctype,@so,@custno,@comp,@sender
+				,@straddrno,@straddr,@endaddrno,@endaddr,@caseend,@caseno,@caseno2,@driverno,@driver
+				,@carno,@cardno,@cstype,@status,@fill,@total,@io,@total2,@bmiles,@emiles,@miles
+				,@value1,@value2,@memo,@price2,@price3
+		--end try
+		--begin catch 
+		--	--nothing
+		--end catch
+
+		fetch next from cursor_table
+		into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t,@u,@v,@w,@x
+	end
+	close cursor_table
+	deallocate cursor_table
+--------------------------------------------------------------------------------------------------
+	declare cursor_table cursor for
+	select accy from #z_hctcy group by accy 
+	open cursor_table
+	fetch next from cursor_table
+	into @accy
+	while(@@FETCH_STATUS <> -1)
+	begin
+		
+		--begin try	
+			set @cmd = "insert into transef"+@accy+"(noa,datea,trandate,carteamno,calctype,so,custno,comp,sender
+				,straddrno,straddr,endaddrno,endaddr,caseend,caseno,caseno2,driverno,driver
+				,carno,cardno,cstype,[status],fill,total,[io],total2,bmiles,emiles,miles
+				,value1,value2,memo,price2,price3)
+			select noa,datea,datea,carteamno,calctype,so,custno,comp,sender
+				,straddrno,straddr,endaddrno,endaddr,caseend,caseno,caseno2,driverno,driver
+				,carno,cardno,cstype,[status],fill,total,[io],total2,bmiles,emiles,miles
+				,value1,value2,memo,price2,price3
+			from #z_hctcy where accy=@accy and isexist=0"
+			execute sp_executesql @cmd,N'@accy nvarchar(10)',@accy=@accy
+			
+			set @cmd=
+			"update transef"+@accy+" set datea=b.datea,trandate=b.datea
+				,carteamno=b.carteamno,calctype=b.calctype,so=b.so,custno=b.custno,comp=b.comp,sender=b.sender
+				,straddrno=b.straddrno,straddr=b.straddr,endaddrno=b.endaddrno,endaddr=b.endaddr
+				,caseend=b.caseend,caseno=b.caseno,caseno2=b.caseno2,driverno=b.driverno,driver=b.driver
+				,carno=b.carno,cardno=b.cardno,cstype=b.cstype,[status]=b.[status],fill=b.fill
+				,total=b.total,[io]=b.[io],total2=b.total2,bmiles=b.bmiles,emiles=b.emiles,miles=b.miles
+				,value1=b.value1,value2=b.value2,memo=b.memo,price2=b.price2,price3=b.price3
+			from transef"+@accy+" a
+			left join #z_hctcy b on a.noa=b.noa
+			where b.accy=@accy and b.isexist=1"
+			execute sp_executesql @cmd,N'@accy nvarchar(10)',@accy=@accy	
+		--end try
+		--begin catch 
+		--	--nothing
+		--end catch
+
+		fetch next from cursor_table
+		into @accy
+	end
+	close cursor_table
+	deallocate cursor_table
+	drop table #z_hctcy;

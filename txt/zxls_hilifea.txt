@@ -1,0 +1,349 @@
+zxls_hilifea:--zxls_hilifea  萊爾富 文流
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max)
+	declare @workerno nvarchar(max) = [1]
+	declare @worker nvarchar(max) = [2]
+	declare @filename nvarchar(max) = [3]
+	declare @curdate nvarchar(max) = convert(nvarchar,getDate(),120)
+	--------------------------------------------------------------------------------------
+	set @filename = REVERSE(replace(Upper(@filename),'HILIFEA',''))
+	set @filename = REVERSE(substring(@filename,charindex('.',@filename)+1,len(@filename)))
+	--------------------------------------------------------------------------------------	
+	--沿用舊的編號   用(檔名,理貨日期,店編,門市運費性質)來判斷唯一性
+	--必須增加索引速度才會快
+	if not exists(SELECT * FROM sys.indexes WHERE name='ef_hilifea' AND object_id = OBJECT_ID('transef103'))
+		create index ef_hilifea on transef103(carteamno,memo,datea,custno,casecustno)
+	if not exists(SELECT * FROM sys.indexes WHERE name='ef_hilifea' AND object_id = OBJECT_ID('transef104'))
+		create index ef_hilifea on transef104(carteamno,memo,datea,custno,casecustno)
+	if not exists(SELECT * FROM sys.indexes WHERE name='ef_hilifea' AND object_id = OBJECT_ID('transef105'))
+		create index ef_hilifea on transef105(carteamno,memo,datea,custno,casecustno)
+	
+	IF OBJECT_ID('tempdb..#z_HiLifeA')is not null 
+	BEGIN
+		drop table #z_HiLifeA
+	END
+	create table #z_HiLifeA(
+		pno int identity(1,1),
+		
+		accy nvarchar(10),
+		noa nvarchar(20),
+		noq nvarchar(10),
+
+		po nvarchar(20),--物流代號	
+		straddrno nvarchar(20),--運費區域代碼	
+		straddr nvarchar(20),--運費區域名稱	
+		driverno nvarchar(20),--運務代號	
+		driver nvarchar(20),--姓名	
+		datea nvarchar(10),--理貨日期
+		trandate nvarchar(10),	
+		custno nvarchar(20),--店編	
+		cust nvarchar(50),--店名	
+		nick nvarchar(20),
+		
+		casecust nvarchar(20),--運費等級代號,運費等級名稱
+		casecustno nvarchar(20),--門市運費性質		
+		--計價	
+		--地區別	
+		caseno nvarchar(20),--路線
+		caseno2 nvarchar(20),--路序		
+		value7 float,--到店運費	
+		value8 float,--EC件數	
+		value9 float,--EC運費	
+		value10 float,--膠外件數	
+		value11 float,--膠外運費
+		value12 float,--萊爾富特殊點
+		memo nvarchar(max),
+		carteamno nvarchar(10),
+		price float,
+		price2 float,
+		price3 float,
+		total float,
+		total2 float
+	)
+	declare @a nvarchar(max)
+	declare @b nvarchar(max)
+	declare @c nvarchar(max)
+	declare @d nvarchar(max)
+	declare @e nvarchar(max)
+	declare @f nvarchar(max)
+	declare @g nvarchar(max)
+	declare @h nvarchar(max)
+	declare @i nvarchar(max)
+	declare @j nvarchar(max)
+	declare @k nvarchar(max)
+	declare @l nvarchar(max)
+	declare @m nvarchar(max)
+	declare @n nvarchar(max)
+	declare @o nvarchar(max)
+	declare @p nvarchar(max)
+	declare @q nvarchar(max)
+	declare @r nvarchar(max)
+	declare @s nvarchar(max)
+	declare @t nvarchar(max)
+	
+	declare @carteamno nvarchar(10) = 14 --文流
+	declare @accy nvarchar(10)
+	declare @memo nvarchar(max)
+	declare @pno int
+	declare @po nvarchar(20)--物流代號	
+	declare @straddrno nvarchar(20)--運費區域代碼	
+	declare @straddr nvarchar(20)--運費區域名稱	
+	declare @driverno nvarchar(20)--運務代號	
+	declare @driver nvarchar(20)--姓名	
+	declare @datea nvarchar(10)--理貨日期
+	declare @trandate nvarchar(10)	
+	declare @custno nvarchar(20)--店編	
+	declare @cust nvarchar(50)--店名	
+	declare @nick nvarchar(20)
+	declare @casecust nvarchar(20)--運費等級代號,運費等級名稱
+	declare @casecustno nvarchar(20)--門市運費性質			
+	declare @caseno nvarchar(20)--路線
+	declare @caseno2 nvarchar(20)--路序		
+	declare @value7 float--到店運費	
+	declare @value8 float--EC件數	
+	declare @value9 float--EC運費	
+	declare @value10 float--膠外件數	
+	declare @value11 float--膠外運費
+	declare @value12 float--萊爾富特殊點
+	
+	declare @cartype nvarchar(20)
+	declare @calctype nvarchar(20)
+	declare @price float
+	declare @price2 float
+	declare @price3 float
+	declare @total float
+	declare @total2 float
+	declare @mode nvarchar(20)
+	
+	declare @inmoney float
+	declare @outmoney float
+	
+	declare @tmpno1 nvarchar(20)
+	declare @tmpno2 nvarchar(20)
+	declare @key nvarchar(20)='BA'
+	declare @noa nvarchar(20) = ''
+	declare @noq nvarchar(20)
+	declare @string nvarchar(max)='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	
+	declare cursor_table cursor for
+	select a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t from ztmpxls order by CAST(noa as int)
+	open cursor_table
+	fetch next from cursor_table
+	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t
+	while(@@FETCH_STATUS <> -1)
+	begin
+		begin try	
+			if ISDATE(@f)>0
+			begin
+				select @cartype= '',@price=0,@price2=0,@price3=0,@total=0,@total2=0,@mode=''
+					,@inmoney=0,@outmoney=0
+					
+				set @po = LTRIM(RTRIM(@a))
+				set @straddrno = LTRIM(RTRIM(@b))
+				set @straddr = LTRIM(RTRIM(@c))
+				set @driverno = LTRIM(RTRIM(@d))
+				set @driver = LTRIM(RTRIM(@e))
+				set @datea = dbo.ad2chineseEraname(replace(@f,char(59),':'))
+				set @trandate = @datea
+				set @custno = LTRIM(RTRIM(@g))
+				set @cust = LTRIM(RTRIM(@h))
+				set @nick = @cust
+				set @casecust = LTRIM(RTRIM(@i))+LTRIM(RTRIM(@j))
+				set @casecustno = LTRIM(RTRIM(@k))			
+				set @caseno = LTRIM(RTRIM(@n))
+				set @caseno2 = LTRIM(RTRIM(@o))
+				set @value7 = CAST(@p as float)
+				set @value8 = CAST(@q as float)
+				set @value9 = CAST(@r as float)
+				set @value10 = CAST(@s as float)
+				set @value11 = CAST(@t as float)
+
+				select @cartype='外車',@mode='模組二'	
+				if LEN(@driverno)>0
+				begin
+					if not exists(select * from driver where noa=@driverno)
+					begin
+						insert into driver(noa,namea,cartype,guild)
+						values(@driverno,@driver,@cartype,@mode)
+					end
+					else
+						select @cartype=cartype,@mode=guild from driver where noa=@driverno
+				end
+				set @calctype = case when @cartype='公司車' then 'A01' when @cartype='靠行' then 'C01' else 'B01' end 	
+				
+				
+				if @casecustno = '共配'
+				begin
+					select @price2=@price2+case when @mode='模組一' then b.driverprice 
+											  when @mode='模組二' then b.driverprice2
+											  when @mode='模組三' then b.commission
+											  else 0 end
+						,@price3=@price3+case when @mode='模組一' then b.driverprice 
+											  when @mode='模組二' then b.driverprice2
+											  when @mode='模組三' then b.commission
+											  else 0 end
+					from addr a
+					left join addrs b on a.noa=b.noa
+					where a.addr = '萊爾富運費計算' and b.custunit='共配'
+				end
+				if @casecustno = '專車'
+				begin
+					select @price2=@price2+case when @mode='模組一' then b.driverprice 
+											  when @mode='模組二' then b.driverprice2
+											  when @mode='模組三' then b.commission
+											  else 0 end
+						,@price3=@price3+case when @mode='模組一' then b.driverprice 
+											  when @mode='模組二' then b.driverprice2
+											  when @mode='模組三' then b.commission
+											  else 0 end
+					from addr a
+					left join addrs b on a.noa=b.noa
+					where a.addr = '萊爾富運費計算' and b.custunit='文流專車'
+				end
+				
+				select @price2=@price2+case when @mode='模組一' then b.driverprice * @value10
+										  when @mode='模組二' then b.driverprice2 * @value10
+										  when @mode='模組三' then b.commission * @value10
+										  else 0 end
+					,@price3=@price3+case when @mode='模組一' then b.driverprice * @value10
+										  when @mode='模組二' then b.driverprice2 * @value10
+										  when @mode='模組三' then b.commission * @value10
+										  else 0 end
+				from addr a
+				left join addrs b on a.noa=b.noa
+				where a.addr = '萊爾富運費計算' and b.custunit like '膠外%'
+				
+			    select @price2=@price2+case when @mode='模組一' then b.driverprice * @value8
+										  when @mode='模組二' then b.driverprice2 * @value8
+										  when @mode='模組三' then b.commission * @value8
+										  else 0 end
+					,@price3=@price3+case when @mode='模組一' then b.driverprice * @value8
+										  when @mode='模組二' then b.driverprice2 * @value8
+										  when @mode='模組三' then b.commission * @value8
+										  else 0 end
+				from addr a
+				left join addrs b on a.noa=b.noa
+				where a.addr = '萊爾富運費計算' and b.custunit like 'EC%'
+	
+				if @cartype='公司車'
+				begin
+					set @price3 = 0
+				end
+				else
+				begin
+					set @price2 = 0
+				end
+				
+				set @value12=0
+				select @value12 = b.custprice from addr a
+				left join addrs b on a.noa=b.noa
+				where a.addr = '萊爾富特殊點' and b.custno=@custno
+				
+				select @price = @value7+@value12,@total=@price
+					,@total2 = @price2 + @price3 
+				
+				insert into #z_HiLifeA(accy,noa,noq,po,straddrno,straddr,driverno,driver
+					,datea,trandate,custno,cust,nick,casecust,casecustno,caseno,caseno2		
+					,value7,value8,value9,value10,value11,value12,memo,carteamno
+					,price,price2,price3,total,total2)
+				select left(@datea,3),@noa,'001',@po,@straddrno,@straddr,@driverno,@driver
+					,@datea,@trandate,@custno,@cust,@nick,@casecust,@casecustno,@caseno,@caseno2		
+					,@value7,@value8,@value9,@value10,@value11,@value12,@filename,@carteamno
+					,@price,@price2,@price3,@total,@total2
+			end
+		end try
+		begin catch 
+			--nothing
+		end catch
+
+		fetch next from cursor_table
+		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t
+	end
+	close cursor_table
+	deallocate cursor_table
+	
+	----------------------------------------------------------------------------------------
+	declare cursor_table cursor for
+	select datea from #z_HiLifeA group by datea
+	open cursor_table
+	fetch next from cursor_table
+	into @datea
+	while(@@FETCH_STATUS <> -1)
+	begin
+		select @tmpno1='',@tmpno2=''
+		set @noa = @key+REPLACE(@datea,'/','')
+		select top 1 @tmpno1=noa from view_transef where noa like @noa+'[0-9,A-Z][0-9][0-9]' order by noa desc
+		select top 1 @tmpno2=noa from #z_HiLifeA where noa like @noa+'[0-9,A-Z][0-9][0-9]' order by noa desc
+		set @noa = @noa + '000'
+		set @noa = case when @noa>@tmpno1 then @noa else @tmpno1 end
+		set @noa = case when @noa>@tmpno2 then @noa else @tmpno2 end
+		set @n =  cast((charindex(left(RIGHT(@noa,3),1),@string)-1)*100+cast(RIGHT(@noa,2) as int)+1 as nvarchar)	
+			
+		declare cursor_table2 cursor for
+		select pno,accy,custno,casecustno,memo from #z_HiLifeA where datea =@datea
+		open cursor_table2
+		fetch next from cursor_table2
+		into @pno,@accy,@custno,@casecustno,@memo
+		while(@@FETCH_STATUS <> -1)
+		begin
+			set @noa = ''
+			--索引要有建不然會很慢
+			--沿用舊的編號   用(檔名,理貨日期,店編,門市運費性質)來判斷唯一性
+			set @cmd =
+				"select @noa = noa  from transef"+@accy+" where carteamno=@carteamno and memo=@memo and datea=@datea and custno=@custno and casecustno=@casecustno"
+			execute sp_executesql @cmd,N'@noa nvarchar(20) output,@carteamno nvarchar(20),@memo nvarchar(max),@datea nvarchar(20),@custno nvarchar(20),@casecustno nvarchar(20)'
+				,@noa=@noa output,@carteamno=@carteamno,@memo=@memo,@datea=@datea,@custno=@custno,@casecustno=@casecustno
+			if len(ISNULL(@noa,''))=0
+			begin
+				set @noq = SUBSTRING(@string,floor(@n/100)+1,1)+right('00'+cast(@n%100 as nvarchar),2)
+				set @noa = @key+REPLACE(@datea,'/','')+@noq
+				set @n = @n + 1
+			end
+			update #z_HiLifeA set noa=@noa where pno=@pno
+			fetch next from cursor_table2
+			into @pno,@accy,@custno,@casecustno,@memo
+		end
+		close cursor_table2
+		deallocate cursor_table2
+
+		fetch next from cursor_table
+		into @datea
+	end
+	close cursor_table
+	deallocate cursor_table
+	-----------------------------------------------------------------------------------
+	--寫入transef
+	declare cursor_table cursor for
+	select accy from #z_HiLifeA group by accy
+	open cursor_table
+	fetch next from cursor_table
+	into @accy
+	while(@@FETCH_STATUS <> -1)
+	begin
+		set @cmd =
+		"delete transef"+@accy+"
+		from transef"+@accy+" a
+		where a.carteamno = @carteamno
+		and exists(select noa from #z_HiLifeA where accy=@accy and noa=a.noa)"
+		execute sp_executesql @cmd,N'@carteamno nvarchar(10),@accy nvarchar(10)'
+		,@carteamno=@carteamno,@accy=@accy
+	
+		set @cmd =
+		"insert into transef"+@accy+"(noa,noq,po,straddrno,straddr,driverno,driver
+				,datea,trandate,custno,comp,nick,casecust,casecustno,caseno,caseno2		
+				,value7,value8,value9,value10,value11,value12,memo,carteamno
+				,price,price2,price3,total,total2)
+		select noa,noq,po,straddrno,straddr,driverno,driver
+			,datea,trandate,custno,cust,nick,casecust,casecustno,caseno,caseno2		
+			,value7,value8,value9,value10,value11,value12,memo,carteamno
+			,price,price2,price3,total,total2
+		from #z_HiLifeA
+		where accy=@accy"
+		execute sp_executesql @cmd,N'@accy nvarchar(10)',@accy=@accy
+	
+		fetch next from cursor_table
+		into @accy
+	end
+	close cursor_table
+	deallocate cursor_table
+	drop table #z_HiLifeA;

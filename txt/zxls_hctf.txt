@@ -1,0 +1,241 @@
+zxls_hctf:--zxls_hctf  峻富  全拖&半拖	
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max)
+	declare @workerno nvarchar(max) = [1]
+	declare @worker nvarchar(max) = [2]
+	declare @filename nvarchar(max) = [3]
+	declare @curdate nvarchar(max) = convert(nvarchar,getDate(),120)
+	--------------------------------------------------------------------------------------
+	set @filename = REVERSE(replace(Upper(@filename),'HCTF',''))
+	set @filename = REVERSE(substring(@filename,charindex('.',@filename)+1,len(@filename)))
+	--------------------------------------------------------------------------------------
+	IF OBJECT_ID('tempdb..#z_hctf')is not null
+	BEGIN
+		drop table #z_hctf
+	END
+	create table #z_hctf(
+		isexist int,
+		accy nvarchar(10),
+		noa nvarchar(20),
+		carteamno nvarchar(20),
+		calctype nvarchar(20),
+		datea nvarchar(10),
+		trandate nvarchar(10),
+		straddrno nvarchar(20),
+		straddr nvarchar(50),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(50),
+		casecust nvarchar(20),	--班次名稱	
+		casecustno nvarchar(20),--班次代號
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		
+		mount3 float,--支票袋
+		mount4 float,--移櫃津貼
+		tolls float,--新竹表定里程
+		reserve float,--空車頭  km(＋)(－)
+		overh float,--原里程增/減
+		overw float,--未請里程
+		commission float,--調度附掛增/減
+		commission2 float,--加班里程
+		unpack float,--外車報表實際里程  總里程
+		weight2 float,--棧板里程
+		weight3 float,--營收
+		memo nvarchar(max)
+	)
+	declare @a nvarchar(max)
+	declare @b nvarchar(max)
+	declare @c nvarchar(max)
+	declare @d nvarchar(max)
+	declare @e nvarchar(max)
+	declare @f nvarchar(max)
+	declare @g nvarchar(max)
+	declare @h nvarchar(max)
+	declare @i nvarchar(max)
+	declare @j nvarchar(max)
+	declare @k nvarchar(max)	
+	declare @l nvarchar(max)
+	declare @m nvarchar(max)
+	declare @n nvarchar(max)
+	declare @o nvarchar(max)
+	declare @p nvarchar(max)
+	declare @q nvarchar(max)
+	declare @r nvarchar(max)
+	declare @s nvarchar(max)
+	declare @t nvarchar(max)
+	declare @u nvarchar(max)
+	declare @v nvarchar(max)
+	declare @w nvarchar(max)
+	declare @x nvarchar(max)
+	declare @y nvarchar(max)
+	declare @z nvarchar(max)
+	
+	declare @aa nvarchar(max)
+	declare @ab nvarchar(max)
+	declare @ac nvarchar(max)
+	declare @ad nvarchar(max)
+	declare @ae nvarchar(max)
+	declare @af nvarchar(max)
+	declare @ag nvarchar(max)
+	declare @ah nvarchar(max)
+	
+	declare @isexist int
+	declare @recno int
+	declare @noa nvarchar(20)
+	declare @datea nvarchar(10)
+	declare @carteamno nvarchar(20)
+	declare @calctype nvarchar(20)
+	declare @straddrno nvarchar(20)
+	declare @straddr nvarchar(40)
+	declare @endaddrno nvarchar(20)
+	declare @endaddr nvarchar(40)
+	
+	declare @driverno nvarchar(20)
+	declare @driver nvarchar(30)
+	
+	declare @casecustno nvarchar(20)
+	declare @casecust nvarchar(20)
+	declare @tolls float
+	declare @reserve float
+	declare @overh float
+	declare @overw float
+	declare @commission float
+	declare @commission2 float
+	declare @unpack float
+	declare @mount3 float
+	declare @mount4 float
+	declare @weight2 float
+	declare @weight3 float
+	-----------------------------------------------------	
+	declare @t_date date
+	declare @number nvarchar(max)
+	declare @string nvarchar(max) = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	declare @nn int
+	declare @mm nvarchar(max)
+	declare @key nvarchar(max)
+	------------------------------------------------------
+	declare cursor_table cursor for
+	select a,b,c,d,e,f,g,h,i,j,k,l,m
+		,n,o,p,q,r,s,t,u,v,w,x,y,z
+		,aa,ab,ac,ad,ae,af,ag,ah 
+	from ztmpxls order by CAST(noa as int)
+	open cursor_table
+	fetch next from cursor_table
+	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m
+		,@n,@o,@p,@q,@r,@s,@t,@u,@v,@w,@x,@y,@z
+		,@aa,@ab,@ac,@ad,@ae,@af,@ag,@ah 
+	while(@@FETCH_STATUS <> -1)
+	begin
+		begin try	
+			set @recno = CAST(@a as int)
+			set @carteamno = case when @b='全拖' then '11' when @b='半拖' then '12' else '' end 
+			if @recno>0 and len(@carteamno)>0
+			begin
+				set @t_date = CONVERT(datetime,substring(@e,1,charindex(space(1),@e)))	
+				if YEAR(@t_date)-1911>0
+					set @datea = right('000'+cast(YEAR(@t_date)-1911 as nvarchar),3)+'/'+right('00'+cast(MONTH(@t_date)as nvarchar),2)+'/'+right('00'+cast(DAY(@t_date)as nvarchar),2)
+				select @straddrno='',@straddr=replace(@g,SPACE(1),'')
+					,@endaddrno='',@endaddr=replace(@h,SPACE(1),'')
+					,@casecust=replace(@i,SPACE(1),''),@casecustno=replace(@j,SPACE(1),'')
+					,@driverno='',@driver=replace(@k,SPACE(1),'')
+					,@calctype='B01' --A01公司車、B01外車
+				select top 1 @straddrno=noa from addr2 where addr=@straddr and len(@straddr)>0
+				select top 1 @endaddrno=noa from addr2 where addr=@endaddr and len(@endaddr)>0
+				select top 1 @driverno=noa,@calctype=case when cartype='公司車' then 'A01' else 'B01' end from driver where namea=@driver and len(@driver)>0
+				
+				select @mount3 =cast(replace(@l,',','') as float)
+					,@mount4 =cast(replace(@m,',','') as float)
+					,@weight2 =cast(replace(@af,',','') as float)
+					,@weight3 =cast(replace(@ag,',','') as float)
+					
+				select @tolls=cast(replace(@w,',','') as float)
+					,@reserve=cast(replace(@x,',','') as float)
+					,@overh=cast(replace(@y,',','') as float)
+					,@overw=cast(replace(@z,',','') as float)
+					,@commission=cast(replace(@aa,',','') as float)
+					,@commission2=cast(replace(@ab,',','') as float)
+					,@unpack=cast(replace(@ac,',','') as float)
+				
+				set @key = @filename+RIGHT('00000'+CAST(@recno as nvarchar),5)
+				set @noa = ''
+				select @noa=noa from view_transef where LEFT(memo,len(@key))=@key 
+				if(LEN(ISNULL(@noa,''))=0)
+				begin
+					set @isexist = 0
+					select top 1 @noa = noa from view_transef where left(noa,9)='BA'+REPLACE(@datea,'/','') order by noa desc
+					select top 1 @noa = case when noa>isnull(@noa,'') then noa else @noa end from #z_hctf where left(noa,9)='BA'+REPLACE(@datea,'/','') order by noa desc
+					if LEN(ISNULL(@noa,'')) = 0
+						set @noa = 'BA'+REPLACE(@datea,'/','')+'000'
+					set @number  = right(@noa,3)				
+					set @nn = (charindex(left(@number,1),@string)-1) * 100 + cast(right(@number,2) as int) + 1
+					set @mm = substring(@string,floor(@nn/100)+1,1)
+					set @noa =  'BA'+REPLACE(@datea,'/','')+@mm+RIGHT('00'+cast(@nn as nvarchar),2)
+				end
+				else
+				begin
+					set @isexist = 1
+				end
+				insert into #z_hctf(isexist,accy,noa,datea,trandate,carteamno,calctype,straddrno,straddr,endaddrno,endaddr
+					,casecust,casecustno,driverno,driver,mount3,mount4,weight2,weight3
+					,tolls,reserve,overh,overw,commission,commission2,unpack,memo)
+				select @isexist,left(@datea,3),@noa,@datea,@datea,@carteamno,@calctype,@straddrno,@straddr,@endaddrno,@endaddr
+					,@casecust,@casecustno,@driverno,@driver,@mount3,@mount4,@weight2,@weight3
+					,@tolls,@reserve,@overh,@overw,@commission,@commission2,@unpack,@key+' '+@curdate
+			end
+		end try
+		begin catch 
+			--nothing
+		end catch
+
+		fetch next from cursor_table
+		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m
+		,@n,@o,@p,@q,@r,@s,@t,@u,@v,@w,@x,@y,@z
+		,@aa,@ab,@ac,@ad,@ae,@af,@ag,@ah 
+	end
+	close cursor_table
+	deallocate cursor_table
+	---------------------------------------------------------------------------------------
+	declare @accy nvarchar(10)
+	
+	declare cursor_table cursor for
+	select accy from #z_hctf group by accy 
+	open cursor_table
+	fetch next from cursor_table
+	into @accy
+	while(@@FETCH_STATUS <> -1)
+	begin
+		begin try	
+			set @cmd = "insert into transef"+@accy 
+				+"(noa,noq,carteamno,calctype,datea,trandate,straddrno,straddr,endaddrno,endaddr" 
+				+",casecust,casecustno,driverno,driver" 
+				+",mount3,mount4,weight2,weight3"
+				+",tolls,reserve,overw,overh,commission,commission2,unpack,memo)" 
+				+"select noa,'001',carteamno,calctype,datea,trandate,straddrno,straddr,endaddrno,endaddr" 
+				+",casecust,casecustno,driverno,driver" 
+				+",mount3,mount4,weight2,weight3"
+				+",tolls,reserve,overh,overw,commission,commission2,unpack,memo" 
+				+" from #z_hctf where accy=@accy and isexist=0" 
+			execute sp_executesql @cmd,N'@accy nvarchar(10)',@accy=@accy	
+			
+			set @cmd = "update transef"+@accy+" set "
+				+" carteamno=b.carteamno,calctype=b.calctype,datea=b.datea,trandate=b.trandate"
+				+",straddrno=b.straddrno,straddr=b.straddr,endaddrno=b.endaddrno,endaddr=b.endaddr" 
+				+",casecust=b.casecust,casecustno=b.casecustno,driverno=b.driverno,driver=b.driver" 
+				+",mount3=b.mount3,mount4=b.mount4,weight2=b.weight2,weight3=b.weight3"
+				+",tolls=b.tolls,reserve=b.reserve,overw=b.overw,overh=b.overh"
+				+",commission=b.commission,commission2=b.commission2,unpack=b.unpack,memo=b.memo" 
+				+" from transef"+@accy+" a"
+				+" left join #z_hctf b on a.noa=b.noa"
+				+" where b.accy=@accy and b.isexist=1" 
+			execute sp_executesql @cmd,N'@accy nvarchar(10)',@accy=@accy			
+		end try
+		begin catch 
+			--nothing
+		end catch
+
+		fetch next from cursor_table
+		into @accy
+	end
+	close cursor_table
+	deallocate cursor_table
+	drop table #z_hctf;

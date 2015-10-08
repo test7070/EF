@@ -1,0 +1,1836 @@
+z_tran_ef18:--z_tran_ef18  萊爾富 常溫		
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max)
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'
+	declare @t_btrandate nvarchar(10) = case when '#non'=[4] then '' else [4] end
+	declare @t_etrandate nvarchar(10) = case when '#non'=[5] then char(255) else [5] end
+	declare @t_bcustno nvarchar(20) = case when '#non'=[8] then '' else [8] end
+	declare @t_ecustno nvarchar(20) = case when '#non'=[9] then char(255) else [9] end
+	declare @t_bdriverno nvarchar(20) = case when '#non'=[10] then '' else [10] end
+	declare @t_edriverno nvarchar(20) = case when '#non'=[11] then char(255) else [11] end
+
+	declare @tmp table(
+		gno nvarchar(10),
+		recno int,
+		accy nvarchar(10),
+		noa nvarchar(20),
+		noq nvarchar(10),
+		datea nvarchar(10),
+		trandate nvarchar(10),
+		casecustno nvarchar(20),
+		casecust nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		custno nvarchar(20),
+		cust nvarchar(50),
+		unit nvarchar(20),
+		po nvarchar(20),
+		total float,
+		price2 float,
+		price3 float,
+		value12 float,
+		total2 float
+	)
+	insert into @tmp(gno,recno,accy,noa,noq,datea,trandate,casecustno,casecust,driverno,driver
+		,custno,cust,unit,po,total,price2,price3,value12,total2)
+	select '1',ROW_NUMBER()over(order by datea,noa)
+		,accy,noa,noq,datea,trandate,casecustno,casecust,driverno,driver
+		,custno,comp,unit,po,total,price2,price3,value12,total2
+	from view_transef
+	where carteamno='15'
+	and isnull(trandate,'') between @t_btrandate and @t_etrandate
+	and isnull(custno,'') between @t_bcustno and @t_ecustno
+	and isnull(driverno,'') between @t_bdriverno and @t_edriverno
+	and (cast(@t_rank as int)>=6 or isnull(worker,'')=@t_user)
+
+	insert into @tmp(gno,total,total2)
+	select '2',sum(isnull(total,0)),sum(isnull(total2,0)) from @tmp
+	
+	select recno rr
+		,"transef?noa=\'"+noa+"\' and "+cast(recno as nvarchar)+"=$rr?"+accy ghref
+		,po a01 --物流代號
+		,casecust a02--區域
+		,driverno a03--運務代號
+		,driver a04--姓名
+		,datea a05--理貨日期
+		,custno a06--店編
+		,cust a07--店名
+		,unit a08--運費等級
+		,casecustno a09--路線
+		,total a10--應收運費
+		,(price2+price3) a11 --應付金額
+		,value12 a12--特殊點
+		,total2 a13--應付費用TTL
+		,*
+	from @tmp 
+	order by gno,datea,noa;
+
+z_tran_ef17:--z_tran_ef17  萊爾富  文流	
+	SET QUOTED_IDENTIFIER OFF
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'
+	declare @t_btrandate nvarchar(10) = case when '#non'=[4] then '' else [4] end
+	declare @t_etrandate nvarchar(10) = case when '#non'=[5] then char(255) else [5] end
+	declare @t_bcustno nvarchar(20) = case when '#non'=[8] then '' else [8] end
+	declare @t_ecustno nvarchar(20) = case when '#non'=[9] then char(255) else [9] end
+	declare @t_bdriverno nvarchar(20) = case when '#non'=[10] then '' else [10] end
+	declare @t_edriverno nvarchar(20) = case when '#non'=[11] then char(255) else [11] end
+	declare @t_caseno nvarchar(max) = case when '#non'=[22] then '' else [22] end
+	declare @t_casecustno nvarchar(max) = case when '#non'=[23] then '' else [23] end
+	---------------------------------------------------------------------------------
+	declare @tmp table(
+		gno nvarchar(10),
+		pno int identity(1,1),
+		recno int,
+		accy nvarchar(10),
+		noa nvarchar(20),
+		trandate nvarchar(10),
+		custno nvarchar(20),
+		comp nvarchar(50),
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		straddrno nvarchar(20),
+		straddr nvarchar(20),
+		casecust nvarchar(20),
+		casecustno nvarchar(20),
+		caseno nvarchar(20),
+		caseno2 nvarchar(20),
+		
+		value7 float,
+		value8 float,
+		value9 float,
+		value10 float,
+		value11 float,
+		value12 float,
+		total float,
+		total2 float,
+		memo nvarchar(max)
+	)
+	insert into @tmp(gno,recno,accy,noa,trandate,custno,comp,driverno,driver
+		,straddrno,straddr,casecust,casecustno,caseno,caseno2
+		,value7,value8,value9,value10,value11,value12,total,total2)
+	select '1',ROW_NUMBER()over(order by trandate,noa)
+		,accy,noa,trandate,custno,comp,driverno,driver
+		,straddrno,straddr,casecust,casecustno,caseno,caseno2
+		,value7,value8,value9,value10,value11,value12,total,total2
+	from view_transef
+	where carteamno='14'
+	and isnull(trandate,'') between @t_btrandate and @t_etrandate
+	and isnull(custno,'') between @t_bcustno and @t_ecustno
+	and isnull(driverno,'') between @t_bdriverno and @t_edriverno
+	and (len(@t_caseno)=0 or CHARINDEX(caseno,@t_caseno)>0)
+	and (len(@t_casecustno)=0 or CHARINDEX(casecustno,@t_casecustno)>0)
+	and (cast(@t_rank as int)>=6 or isnull(worker,'')=@t_user)
+	
+	insert into @tmp(gno,value7,value8,value9,value10,value11,value12,total,total2)
+	select '2',SUM(ISNULL(value7,0)),SUM(ISNULL(value8,0)),SUM(ISNULL(value9,0))
+		,SUM(ISNULL(value10,0)),SUM(ISNULL(value11,0)),SUM(ISNULL(value12,0))
+		,SUM(ISNULL(total,0)),SUM(ISNULL(total2,0))
+	from @tmp
+	
+	select recno rr
+		,"transef?noa=\'"+noa+"\' and "+cast(recno as nvarchar)+"=$rr?"+accy ghref
+		,straddr a01
+		,driver a02
+		,trandate a03
+		,comp a04
+		,casecust a05
+		,casecustno a06
+		,caseno a07
+		,caseno2 a08
+		,value7 a09
+		,value8 a10
+		,value9 a11
+		,value10 a12
+		,value11 a13
+		,value12 a14
+		,total a15
+		,total2 a16
+		,*
+	from @tmp
+	order by gno,recno;
+	
+z_tran_ef15:--z_tran_ef15
+	SET QUOTED_IDENTIFIER OFF	
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'
+	declare @t_bdate nvarchar(10)= case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(10)= case when '#non'=[3] then char(255) else [3] end
+	declare @t_btrandate nvarchar(10) = case when '#non'=[4] then '' else [4] end
+	declare @t_etrandate nvarchar(10) = case when '#non'=[5] then char(255) else [5] end
+	------------------------------------------------------------------------------
+	declare @tmp table(
+		recno int,
+		gno nvarchar(10),
+		accy nvarchar(20),
+		noa nvarchar(20),
+		datea nvarchar(10),
+		carteamno nvarchar(20),
+		calctype nvarchar(20),
+		so nvarchar(20),
+		custno nvarchar(20),
+		comp nvarchar(20),
+		sender nvarchar(20),
+		straddrno nvarchar(20),
+		straddr nvarchar(20),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(20),
+		caseend nvarchar(20),--卸櫃地
+		caseno nvarchar(20),
+		caseno2 nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		carno nvarchar(20),
+		cardno nvarchar(20),
+		cstype nvarchar(20),--尺寸
+		[status] nvarchar(20),--代碼
+		fill nvarchar(20),--進出空重
+		total float,
+		io nvarchar(20),--稅內含
+		total2 float,
+		bmiles float,
+		emiles float,
+		miles float,
+		value1 float,
+		value2 float
+	)
+	insert into @tmp(recno,gno,accy,noa,datea,carteamno,calctype,so,custno,comp,sender
+				,straddrno,straddr,endaddrno,endaddr,caseend,caseno,caseno2,driverno,driver
+				,carno,cardno,cstype,[status],fill,total,[io],total2,bmiles,emiles,miles
+				,value1,value2)
+	select	ROW_NUMBER()over(order by datea,noa),'1' 
+		,accy,noa,datea,carteamno,calctype,so,custno,comp,sender
+		,straddrno,straddr,endaddrno,endaddr,caseend,caseno,caseno2,driverno,driver
+		,carno,cardno,cstype,[status],fill,total,[io],total2,bmiles,emiles,miles
+		,value1,value2
+	from view_transef a
+	where a.carteamno='13'
+	and ISNULL(a.datea,'') between @t_bdate and @t_edate
+	and ISNULL(a.trandate,'') between @t_btrandate and @t_etrandate
+	and (cast(@t_rank as int)>=6 or isnull(a.worker,'')=@t_user)
+	
+	insert into @tmp(gno,total,total2)
+	select '2',SUM(ISNULL(total,0)),SUM(ISNULL(total2,0))
+	from @tmp
+	
+	select recno rr
+		,"transef?noa=\'"+noa+"\' and "+cast(recno as nvarchar)+"=$rr?"+accy ghref 
+		,so a00
+		,comp a01
+		,sender a02
+		,straddr a03
+		,endaddr a04
+		,caseend a05
+		,caseno a06
+		,caseno2 a07
+		,driver a08
+		,carno a09
+		,cardno a10
+		,cstype a11
+		,[status] a12
+		,fill a13
+		,dbo.getComma(total,0) a14
+		,[io] a15
+		,dbo.getComma(total2,0) a16
+		,dbo.getComma(bmiles,0) a17
+		,dbo.getComma(emiles,0) a18
+		,dbo.getComma(miles,0) a19
+		,value1 a20
+		,value2 a21
+		,* 
+	from @tmp order by gno,recno;
+	
+	
+z_tran_ef14:--z_tran_ef14
+	SET QUOTED_IDENTIFIER OFF
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'	
+	declare @t_bdate nvarchar(10)= case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(10)= case when '#non'=[3] then char(255) else [3] end
+	declare @t_btrandate nvarchar(10) = case when '#non'=[4] then '' else [4] end
+	declare @t_etrandate nvarchar(10) = case when '#non'=[5] then char(255) else [5] end
+	------------------------------------------------------------------------------
+	declare @tmp table(
+		recno int,
+		gno nvarchar(10),
+		accy nvarchar(20),
+		noa nvarchar(20),
+		datea nvarchar(10),
+		straddrno nvarchar(20),
+		straddr nvarchar(20),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(20),
+		casecust nvarchar(20),
+		casecustno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		
+		tolls float,
+		reserve float,
+		overh float,
+		overw float,
+		commission float,
+		commission2 float,
+		unpack float,
+		mount3 float,
+		mount4 float,
+		weight2 float,
+		weight3 float
+	)
+	insert into @tmp(recno,gno,accy,noa,datea,straddrno,straddr,endaddrno,endaddr,casecust,casecustno,driverno,driver
+		,tolls,reserve,overh,overw,commission,commission2,unpack,mount3,mount4,weight2,weight3)
+	select	ROW_NUMBER()over(order by datea,noa),'1' 
+		,accy,noa,datea,straddrno,straddr,endaddrno,endaddr,casecust,casecustno,driverno,driver
+		,tolls,reserve,overh,overw,commission,commission2,unpack,mount3,mount4,weight2,weight3 
+	from view_transef a
+	where a.carteamno='12'
+	and ISNULL(a.datea,'') between @t_bdate and @t_edate
+	and ISNULL(a.trandate,'') between @t_btrandate and @t_etrandate
+	and (cast(@t_rank as int)>=6 or isnull(a.worker,'')=@t_user)
+	
+	insert into @tmp(gno,tolls,reserve,overh,overw,commission,commission2,unpack,mount3,mount4,weight2,weight3 )
+	select '2',SUM(isnull(tolls,0)),SUM(isnull(reserve,0)),SUM(isnull(overh,0))
+		,SUM(isnull(overw,0)),SUM(isnull(commission,0)),SUM(isnull(commission2,0)),SUM(isnull(unpack,0))
+		,SUM(isnull(mount3,0)),SUM(isnull(mount4,0)),SUM(isnull(weight2,0)),SUM(isnull(weight3,0))
+	from @tmp
+	
+	select recno rr
+		,"transef?noa=\'"+noa+"\' and "+cast(recno as nvarchar)+"=$rr?"+accy ghref
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+right(datea,5)+'('+substring('日一二三四五六',datepart(W,CAST(cast(cast(LEFT(datea,3) as int)+1911 as nvarchar)+RIGHT(datea,6) as date)),1)+')'+'</a>' a01
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(straddrno)=0 then 'color:darkred'+char(59) else '' end+'">'+straddr+'</a>' a02
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(endaddrno)=0 then 'color:darkred'+char(59) else '' end+'">'+endaddr+'</a>' a03
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+casecust+'</a>' a04
+		,casecustno a05
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(driverno)=0 then 'color:darkred'+char(59) else '' end+'">'+driver+'</a>' a06
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(tolls,0)),1)),4,12)) a07
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(reserve,0)),1)),4,12)) a08
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(overh,0)),1)),4,12)) a09
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(overw,0)),1)),4,12)) a10
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(commission,0)),1)),4,12)) a11
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(commission2,0)),1)),4,12)) a12
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(unpack,0)),1)),4,12)) a13
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(mount3,0)),1)),4,12)) a14
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(mount4,0)),1)),4,12)) a15
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(weight2,0)),1)),4,12)) a16
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(weight3,0)),1)),4,12)) a17
+		,* 
+	from @tmp 
+	order by gno,recno;
+	
+z_tran_ef13:--z_tran_ef13
+	SET QUOTED_IDENTIFIER OFF
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'	
+	declare @t_bdate nvarchar(10)= case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(10)= case when '#non'=[3] then char(255) else [3] end
+	declare @t_btrandate nvarchar(10) = case when '#non'=[4] then '' else [4] end
+	declare @t_etrandate nvarchar(10) = case when '#non'=[5] then char(255) else [5] end
+	------------------------------------------------------------------------------
+	declare @tmp table(
+		recno int,
+		gno nvarchar(10),
+		accy nvarchar(20),
+		noa nvarchar(20),
+		datea nvarchar(10),
+		straddrno nvarchar(20),
+		straddr nvarchar(20),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(20),
+		casecust nvarchar(20),
+		casecustno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		
+		tolls float,
+		reserve float,
+		overh float,
+		overw float,
+		commission float,
+		commission2 float,
+		unpack float,
+		mount3 float,
+		mount4 float,
+		weight2 float,
+		weight3 float
+	)
+	insert into @tmp(recno,gno,accy,noa,datea,straddrno,straddr,endaddrno,endaddr,casecust,casecustno,driverno,driver
+		,tolls,reserve,overh,overw,commission,commission2,unpack,mount3,mount4,weight2,weight3)
+	select	ROW_NUMBER()over(order by datea,noa),'1' 
+		,accy,noa,datea,straddrno,straddr,endaddrno,endaddr,casecust,casecustno,driverno,driver
+		,tolls,reserve,overh,overw,commission,commission2,unpack,mount3,mount4,weight2,weight3 
+	from view_transef a
+	where a.carteamno='11'
+	and ISNULL(a.datea,'') between @t_bdate and @t_edate
+	and ISNULL(a.trandate,'') between @t_btrandate and @t_etrandate
+	and (cast(@t_rank as int)>=6 or isnull(a.worker,'')=@t_user)
+	
+	insert into @tmp(gno,tolls,reserve,overh,overw,commission,commission2,unpack,mount3,mount4,weight2,weight3 )
+	select '2',SUM(isnull(tolls,0)),SUM(isnull(reserve,0)),SUM(isnull(overh,0))
+		,SUM(isnull(overw,0)),SUM(isnull(commission,0)),SUM(isnull(commission2,0)),SUM(isnull(unpack,0))
+		,SUM(isnull(mount3,0)),SUM(isnull(mount4,0)),SUM(isnull(weight2,0)),SUM(isnull(weight3,0))
+	from @tmp
+	
+	select recno rr
+		,"transef?noa=\'"+noa+"\' and "+cast(recno as nvarchar)+"=$rr?"+accy ghref
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+right(datea,5)+'('+substring('日一二三四五六',datepart(W,CAST(cast(cast(LEFT(datea,3) as int)+1911 as nvarchar)+RIGHT(datea,6) as date)),1)+')'+'</a>' a01
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(straddrno)=0 then 'color:darkred'+char(59) else '' end+'">'+straddr+'</a>' a02
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(endaddrno)=0 then 'color:darkred'+char(59) else '' end+'">'+endaddr+'</a>' a03
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+casecust+'</a>' a04
+		,casecustno a05
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(driverno)=0 then 'color:darkred'+char(59) else '' end+'">'+driver+'</a>' a06
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(tolls,0)),1)),4,12)) a07
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(reserve,0)),1)),4,12)) a08
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(overh,0)),1)),4,12)) a09
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(overw,0)),1)),4,12)) a10
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(commission,0)),1)),4,12)) a11
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(commission2,0)),1)),4,12)) a12
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(unpack,0)),1)),4,12)) a13
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(mount3,0)),1)),4,12)) a14
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(mount4,0)),1)),4,12)) a15
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(weight2,0)),1)),4,12)) a16
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(weight3,0)),1)),4,12)) a17
+		,* 
+	from @tmp 
+	order by gno,recno;
+
+z_tran_ef12:--z_tran_ef12
+	SET QUOTED_IDENTIFIER OFF
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'	
+	declare @t_bdate nvarchar(10)= case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(10)= case when '#non'=[3] then char(255) else [3] end
+	declare @t_btrandate nvarchar(10) = case when '#non'=[4] then '' else [4] end
+	declare @t_etrandate nvarchar(10) = case when '#non'=[5] then char(255) else [5] end
+	declare @t_btggno nvarchar(20) = case when '#non'=[20] then '' else [20] end
+	declare @t_etggno nvarchar(20) = case when '#non'=[21] then char(255) else [21] end
+	----------------------------------------------------------	
+	declare @tmp table(
+		gno nvarchar(10),
+		recno int,
+		tranaccy nvarchar(10),
+		tranno nvarchar(20),
+		trandate nvarchar(10),
+		straddrno nvarchar(20),
+		straddr nvarchar(40),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(40),
+		memo nvarchar(max),
+		tggno nvarchar(20),
+		tgg nvarchar(50),
+		carno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(40),
+		inmount float,
+		pton float,
+		price2 float,
+		price3 float,
+		miles float
+	)
+	insert into @tmp(gno,recno,tranaccy,tranno,trandate,straddrno,straddr,endaddrno,endaddr,memo,tggno,tgg,carno,driverno,driver,inmount,pton,price2,price3,miles)
+	select '1',ROW_NUMBER()over(order by trandate,noa) 
+		,a.accy,a.noa,a.trandate,a.straddrno,a.straddr,a.endaddrno,a.endaddr,a.casecust,a.tggno,a.tgg,a.carno,a.driverno,a.driver,a.inmount,a.pton,a.price2,a.price3,a.miles
+	from view_transef a
+	where a.carteamno='10'
+	and ISNULL(a.datea,'') between @t_bdate and @t_edate
+	and ISNULL(a.trandate,'') between @t_btrandate and @t_etrandate
+	and ISNULL(a.tggno,'') between @t_btggno and @t_etggno
+	and (cast(@t_rank as int)>=6 or isnull(a.worker,'')=@t_user)
+	
+	insert into @tmp(gno,inmount,pton,price2,price3,miles)
+	select '2',sum(isnull(inmount,0)),sum(isnull(pton,0)),sum(isnull(price2,0)),sum(isnull(price3,0)),sum(isnull(miles,0)) from @tmp where gno='1'
+	
+	select recno rr 
+		,"transef?noa=\'"+tranno+"\' and "+cast(recno as nvarchar)+"=$rr?"+tranaccy ghref
+		,trandate a01
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(straddrno)=0 then 'color:darkred'+char(59) else '' end+'">'+straddr+'</a>' a02
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(endaddrno)=0 then 'color:darkred'+char(59) else '' end+'">'+endaddr+'</a>' a03
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+memo+'</a>' a04
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(tggno)=0 then 'color:darkred'+char(59) else '' end+'">'+tgg+'</a>' a05
+		,carno a06
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(driverno)=0 then 'color:darkred'+char(59) else '' end+'">'+driver+'</a>' a07
+		,inmount a08
+		,pton a09
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(price2,0)+ISNULL(price3,0)),1)),4,12)) a10
+		,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(price2,0)+ISNULL(miles,0)),1)),4,12)) a11
+		,* 	
+	from @tmp order by gno,recno;
+
+z_tran_ef11:--z_tran_ef11
+	SET QUOTED_IDENTIFIER OFF	
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'
+	declare @t_bdate nvarchar(10)= case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(10)= case when '#non'=[3] then char(255) else [3] end
+	declare @t_btrandate nvarchar(10) = case when '#non'=[4] then '' else [4] end
+	declare @t_etrandate nvarchar(10) = case when '#non'=[5] then char(255) else [5] end
+	declare @t_btggno nvarchar(20) = case when '#non'=[20] then '' else [20] end
+	declare @t_etggno nvarchar(20) = case when '#non'=[21] then char(255) else [21] end
+	----------------------------------------------------------
+	declare @tmp table(
+		gno nvarchar(10),
+		recno int,
+		tranaccy nvarchar(10),
+		tranno nvarchar(20),
+		trandate nvarchar(10),
+		straddrno nvarchar(20),
+		straddr nvarchar(40),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(40),
+		memo nvarchar(max),
+		tggno nvarchar(20),
+		tgg nvarchar(50),
+		carno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(40),
+		pton float,
+		price2 float,
+		price3 float,
+		miles float
+	)
+	insert into @tmp(gno,recno,tranaccy,tranno,trandate,straddrno,straddr,endaddrno,endaddr,memo,tggno,tgg,carno,driverno,driver,pton,price2,price3,miles)
+	select '1',ROW_NUMBER()over(order by trandate,noa) 
+		,a.accy,a.noa,a.trandate,a.straddrno,a.straddr,a.endaddrno,a.endaddr,a.casecust,a.tggno,a.tgg,a.carno,a.driverno,a.driver,a.pton,a.price2,a.price3,a.miles
+	from view_transef a
+	where a.carteamno='09'
+	and ISNULL(a.datea,'') between @t_bdate and @t_edate
+	and ISNULL(a.trandate,'') between @t_btrandate and @t_etrandate
+	and ISNULL(a.tggno,'') between @t_btggno and @t_etggno
+	and (cast(@t_rank as int)>=6 or isnull(a.worker,'')=@t_user)
+	
+	insert into @tmp(gno,pton,price2,price3,miles)
+	select '2',sum(isnull(pton,0)),sum(isnull(price2,0)),sum(isnull(price3,0)),sum(isnull(miles,0)) from @tmp where gno='1'
+	
+	select recno rr 
+		,"transef?noa=\'"+tranno+"\' and "+cast(recno as nvarchar)+"=$rr?"+tranaccy ghref
+		,trandate a01
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(straddrno)=0 then 'color:darkred'+char(59) else '' end+'">'+straddr+'</a>' a02
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(endaddrno)=0 then 'color:darkred'+char(59) else '' end+'">'+endaddr+'</a>' a03
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+memo+'</a>' a04
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(tggno)=0 then 'color:darkred'+char(59) else '' end+'">'+tgg+'</a>' a05
+		,carno a06
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+case when len(driverno)=0 then 'color:darkred'+char(59) else '' end+'">'+driver+'</a>' a07
+		,pton a08
+		,dbo.getComma(ISNULL(price2,0)+ISNULL(price3,0),0) a09
+		,dbo.getComma(ISNULL(miles,0),0) a10
+		,* 	
+	from @tmp order by gno,recno;
+
+z_tran_ef10:--z_tran_ef10	
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max)
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'
+	declare @t_bdate nvarchar(10)= case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(10)= case when '#non'=[3] then char(255) else [3] end
+	declare @t_btggno nvarchar(20)= case when '#non'=[20] then '' else [20] end
+	declare @t_etggno nvarchar(20)= case when '#non'=[21] then char(255) else [21] end
+	---------------------------------------------------------------------
+	declare @tmp table(
+		recno int,
+		gno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(40),
+		tggno nvarchar(20),
+		tgg nvarchar(40),
+		nick nvarchar(20),
+		timea int,
+		moneya float,
+		timeb int,
+		moneyb float,
+		
+		tottime int,
+		total float
+	)
+	insert into @tmp(recno,gno,driverno,driver,tggno,tgg,nick,timea,moneya,timeb,moneyb)
+	select ROW_NUMBER()over( order by ISNULL(a.driver,''),isnull(a.tggno,'')),'1'
+	,ISNULL(a.driverno,''),ISNULL(a.driver,'')
+	,isnull(a.tggno,''),isnull(b.comp,isnull(a.tgg,'')),isnull(b.nick,'')
+	,sum(case when a.carteamno='09' then 1 else 0 end)
+	,SUM(case when a.carteamno='09' then ISNULL(price2,0)+isnull(price3,0) else 0 end)
+	,sum(case when a.carteamno='10' then 1 else 0 end)
+	,SUM(case when a.carteamno='10' then ISNULL(price2,0)+isnull(price3,0) else 0 end)
+	from view_transef a
+	left join tgg b on a.tggno=b.noa
+	where a.carteamno between '09' and '10'
+	and a.trandate between @t_bdate and @t_edate
+	and isnull(a.tggno,'') between @t_btggno and @t_etggno
+	and (cast(@t_rank as int)>=6 or isnull(a.worker,'')=@t_user)
+
+	group by ISNULL(a.driverno,''),ISNULL(a.driver,''),isnull(a.tggno,''),isnull(b.comp,isnull(a.tgg,'')),isnull(b.nick,'')
+	
+	insert into @tmp(gno,driverno,driver,tggno,timea,moneya,timeb,moneyb)
+	select  '2',CHAR(255),CHAR(255),CHAR(255)
+		,SUM(ISNULL(timea,0))
+		,SUM(ISNULL(moneya,0))
+		,SUM(ISNULL(timeb,0))
+		,SUM(ISNULL(moneyb,0))
+	from @tmp where gno='1'	   
+	
+	update @tmp set tottime = ISNULL(timea,0)+ISNULL(timeb,0)   
+		,total = ISNULL(moneya,0)+ISNULL(moneyb,0)                                          
+	
+	declare @string nvarchar(max)='棧板A.B段應付帳款總表（'+@t_bdate+'～'+@t_edate+'）'
+	
+	select * 
+	,recno rr
+	,"transef?\'all\'=\'all\' and "+cast(tottime as nvarchar)+"="+cast(tottime as nvarchar)+" and carteamno between \'09\' and \'10\' and datea between \'"+@t_bdate+"\' and \'"+@t_edate+"\' and driver=\'"+driver+"\' and tggno=\'"+tggno+"\' and "+cast(recno as nvarchar)+"=$rr?"+left(@t_bdate,3) ghref
+	,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+@string+'</a>' titlea
+	,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+case when len(nick)=0 then tgg else nick end+'</a>' cnick	
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,timea),1)),4,12)) a01
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,moneya),1)),4,12)) a02
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,timeb),1)),4,12)) a03
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,moneyb),1)),4,12)) a04
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,tottime),1)),4,12)) a05
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,total),1)),4,12)) a06
+	from @tmp order by gno,driver,tggno;
+
+z_tran_ef03:--z_tran_ef03	
+	declare @t_bmon nvarchar(10) = case when '#non'=[6] then '' else [6] end
+	declare @t_emon nvarchar(10) = case when '#non'=[7] then char(255) else [7] end
+	declare @t_bcustno nvarchar(20) = case when '#non'=[8] then '' else [8] end
+	declare @t_ecustno nvarchar(20) = case when '#non'=[9] then char(255) else [9] end
+	--------------------------------------------------------------------------------
+	declare @t_pageline int = 30  --一頁的行數
+	declare @tmp table(
+		gno nvarchar(10),
+		pno nvarchar(10),
+		rno nvarchar(max),
+		trandate nvarchar(10),
+		custno nvarchar(20),
+		cust nvarchar(50),
+		carno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		insures float,
+		money1 float,
+		money2 float,
+		custplus float,
+		custminus float,
+		driverplus float,
+		driverminus float,
+		reserve float,
+		tolls float,
+		etc float,
+		oil float,
+		wmoney float,
+		wmoneycar float,
+		wmoneyplate float,
+		cmoney float,
+		dmoney float,
+		emoney float,
+		ticket float,
+		bonus float,
+		tax float,
+		depreciation float,
+		driverpay float,
+		profit float
+	)
+	insert into @tmp(gno,pno,custno,cust,insures,money1,money2
+		,custplus,custminus,driverplus,driverminus,reserve,tolls,etc,oil
+		,wmoney,wmoneycar,wmoneyplate,cmoney,dmoney,emoney,ticket,bonus,tax,depreciation,driverpay)
+	select '1','1',isnull(a.custno,''),isnull(b.nick,'')		
+		,sum(ISNULL(a.insures,0)),sum(ISNULL(a.money1,0)),sum(ISNULL(a.money2,0))
+		,sum(ISNULL(a.custplus,0)),sum(ISNULL(a.custminus,0)),sum(ISNULL(a.driverplus,0)),sum(ISNULL(a.driverminus,0))
+		,sum(ISNULL(a.reserve,0)),sum(ISNULL(a.tolls,0)),sum(ISNULL(a.etc,0)),sum(ISNULL(a.oil,0))
+		,sum(ISNULL(a.wmoney,0)),sum(ISNULL(a.wmoneycar,0)),sum(ISNULL(a.wmoneyplate,0)),sum(ISNULL(a.cmoney,0)),sum(ISNULL(a.dmoney,0)),sum(ISNULL(a.emoney,0))
+		,sum(ISNULL(a.ticket,0)),sum(ISNULL(a.bonus,0)),sum(ISNULL(a.tax,0)),sum(ISNULL(a.depreciation,0)) 
+		,sum(isnull(a.driverpay,0))
+	from trans_sum a
+	left join cust b on a.custno=b.noa
+	where a.mon between @t_bmon and @t_emon
+	and a.custno between @t_bcustno and @t_ecustno
+	group by isnull(a.custno,''),isnull(b.nick,'')
+	
+	
+	
+	insert into @tmp(gno,pno,insures,money1,money2
+		,custplus,custminus,driverplus,driverminus,reserve,tolls,etc,oil
+		,wmoney,wmoneycar,wmoneyplate,cmoney,dmoney,emoney,ticket,bonus,tax,depreciation,driverpay)
+	select '2','2',sum(insures),SUM(money1),SUM(money2)
+		,SUM(custplus),SUM(custminus),SUM(driverplus),SUM(driverminus),SUM(reserve),SUM(tolls),SUM(etc),SUM(oil)
+		,SUM(wmoney),SUM(wmoneycar),SUM(wmoneyplate),SUM(cmoney),SUM(dmoney),SUM(emoney),SUM(ticket),SUM(bonus),SUM(tax),SUM(depreciation)
+		,sum(driverpay)
+	from @tmp where pno='1'
+	
+	update @tmp set profit=money1-money2-insures+custplus-custminus-driverplus+driverminus-reserve-tolls
+		-etc-oil-wmoney-cmoney-dmoney-emoney-ticket-bonus-tax-depreciation+driverpay
+	update @tmp set gno = '4' where profit<0 and pno='1'
+	
+	
+	select *
+	,custno m01
+	,cust m02
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,money1),1)),4,12))  m07
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,custplus),1)),4,12))  m08
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,custminus),1)),4,12))  m09
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,money2),1)),4,12))  m10
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,driverplus),1)),4,12))  m11
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,driverminus),1)),4,12))  m12
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,reserve),1)),4,12))  m13
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,isnull(tolls,0)+ISNULL(etc,0)),1)),4,12))  m14
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,oil),1)),4,12))  m15
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(wmoney,0)),1)),4,12))  m16
+	--,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,wmoneycar),1)),4,12))  ma16
+	--,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,wmoneyplate),1)),4,12))  mb16
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(cmoney,0)),1)),4,12))  m17
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(dmoney,0)),1)),4,12))  m18
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(emoney,0)),1)),4,12))  m19
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ticket),1)),4,12))  m18
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,bonus),1)),4,12)) m19
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,tax),1)),4,12))  m20
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,depreciation),1)),4,12))  m21
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,insures),1)),4,12))  m22
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,profit),1)),4,12))  m24
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,driverpay),1)),4,12))  m25
+	from @tmp 
+	order by pno,custno;
+
+z_tran_ef02:--z_tran_ef02	
+	declare @t_bmon nvarchar(10) = case when '#non'=[6] then '' else [6] end
+	declare @t_emon nvarchar(10) = case when '#non'=[7] then char(255) else [7] end
+	declare @t_bdriverno nvarchar(20) = case when '#non'=[10] then '' else [10] end
+	declare @t_edriverno nvarchar(20) = case when '#non'=[11] then char(255) else [11] end
+	declare @t_carno nvarchar(max) = case when '#non'=[12] then '' else [12] end
+	declare @t_carkind nvarchar(max) = case when '#non'=[16] then '' else [16] end	
+	declare @t_detail nvarchar(max) = case when '#non'=[19] then '' else [19] end	
+	--------------------------------------------------------------------------------
+	declare @t_pageline int = 30  --一頁的行數
+	declare @tmp table(
+		gno nvarchar(10),
+		pno nvarchar(10),
+		rno nvarchar(max),
+		caryear nvarchar(20),
+		carkindno nvarchar(20),
+		carkind nvarchar(20),
+		oilmount float,
+		miles float,
+		oilrate float,
+		kl float,
+		carday float,
+		trandate nvarchar(10),
+		custno nvarchar(20),
+		cust nvarchar(50),
+		carno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		insures float,
+		money1 float,
+		money2 float,
+		custplus float,
+		custminus float,
+		driverplus float,
+		driverminus float,
+		reserve float,
+		tolls float,
+		etc float,
+		oil float,
+		wmoney float,
+		wmoneycar float,
+		wmoneyplate float,
+		cmoney float,
+		dmoney float,
+		emoney float,
+		ticket float,
+		bonus float,
+		tax float,
+		depreciation float,
+		driverpay float,
+		profit float
+	)
+	insert into @tmp(gno,pno,carkindno,carkind,carno,insures,money1,money2
+		,custplus,custminus,driverplus,driverminus,reserve,tolls,etc,oil
+		,wmoney,wmoneycar,wmoneyplate,cmoney,dmoney,emoney,ticket,bonus,tax,depreciation,driverpay)
+	select '1','1',isnull(b.carkindno,''),ISNULL(c.kind,''),ISNULL(a.carno,'')
+		,sum(ISNULL(a.insures,0)),sum(ISNULL(a.money1,0)),sum(ISNULL(a.money2,0))
+		,sum(ISNULL(a.custplus,0)),sum(ISNULL(a.custminus,0)),sum(ISNULL(a.driverplus,0)),sum(ISNULL(a.driverminus,0))
+		,sum(ISNULL(a.reserve,0)),sum(ISNULL(a.tolls,0)),sum(ISNULL(a.etc,0)),sum(ISNULL(a.oil,0))
+		,sum(ISNULL(a.wmoney,0)),sum(ISNULL(a.wmoneycar,0)),sum(ISNULL(a.wmoneyplate,0)),sum(ISNULL(a.cmoney,0)),sum(ISNULL(a.dmoney,0)),sum(ISNULL(a.emoney,0))
+		,sum(ISNULL(a.ticket,0)),sum(ISNULL(a.bonus,0)),sum(ISNULL(a.tax,0)),sum(ISNULL(a.depreciation,0)) 
+		,sum(isnull(a.driverpay,0))
+	from trans_sum a
+	left join car2 b on a.carno=b.carno
+	left join carkind c on b.carkindno=c.noa
+	where a.mon between @t_bmon and @t_emon
+	and b.cartype = '2' --公司車
+	and isnull(a.driverno,'') between @t_bdriverno and @t_edriverno
+	and (len(@t_carno)=0 or (len(ISNULL(b.carno,''))>0 and CHARINDEX(','+b.carno+',',','+@t_carno+',')>0))
+	and (len(@t_carkind)=0 or (len(ISNULL(b.carkindno,''))>0 and CHARINDEX(','+b.carkindno+',',','+@t_carkind+',')>0))
+	group by isnull(b.carkindno,''),ISNULL(c.kind,''),ISNULL(a.carno,'')
+	
+	update @tmp set caryear=b.caryear,oilmount=c.mount,oilrate=case when money1!=0 then oil/money1*100 else 0 end
+		,miles=c.miles
+		,kl=case when c.mount!=0 then c.miles/c.mount else 0 end
+		,carday=d.mount
+	from @tmp a
+	left join car2 b on a.carno=b.carno
+	left join (select carno,SUM(isnull(mount,0)) mount,SUM(ISNULL(miles,0)) miles 
+		from oil where LEFT(datea,6) between @t_bmon and @t_emon group by carno) c on a.carno=c.carno
+	left join (select carno,count(1) mount 
+		from (SELECT DISTINCT isnull(carno,'') carno,trandate from trans_sum where mon between @t_bmon and @t_emon) a 
+		group by carno) d on a.carno=d.carno 
+	
+	insert into @tmp(gno,pno,carkindno,carkind,miles,oilmount,insures,money1,money2
+		,custplus,custminus,driverplus,driverminus,reserve,tolls,etc,oil
+		,wmoney,wmoneycar,wmoneyplate,cmoney,dmoney,emoney,ticket,bonus,tax,depreciation,driverpay)
+	select '2','2',carkindno,carkind,SUM(ISNULL(miles,0)),SUM(isnull(oilmount,0)),sum(insures),SUM(money1),SUM(money2)
+		,SUM(custplus),SUM(custminus),SUM(driverplus),SUM(driverminus),SUM(reserve),SUM(tolls),SUM(etc),SUM(oil)
+		,SUM(wmoney),SUM(wmoneycar),SUM(wmoneyplate),SUM(cmoney),SUM(dmoney),SUM(emoney),SUM(ticket),SUM(bonus),SUM(tax),SUM(depreciation)
+		,sum(driverpay)
+	from @tmp where pno='1' group by carkindno,carkind
+
+	update @tmp set oilrate=case when money1!=0 then oil/money1*100 else 0 end
+		,kl = case when oilmount!=0 then miles/oilmount else 0 end
+	where pno='2'
+	
+	update @tmp set profit=money1-money2-insures+custplus-custminus-driverplus+driverminus-reserve-tolls
+		-etc-oil-wmoney-cmoney-dmoney-emoney-ticket-bonus-tax-depreciation+driverpay
+	update @tmp set gno = '4' where profit<0 and pno='1'
+	----------------------------------------------------------------------------------------------------
+	if len(@t_detail)>0
+	begin
+		update @tmp set gno='5',rno=case when len(isnull(caryear,''))>0 then '1' else '2' end+isnull(caryear,'')+carno+CHAR(255) where gno='1'
+		update @tmp set gno='6',rno=case when len(isnull(caryear,''))>0 then '1' else '2' end+isnull(caryear,'')+carno where gno='4'
+		
+		insert into @tmp(gno,pno,rno,carkindno,carkind,trandate,custno,cust,carno,driverno,driver,insures,money1,money2
+			,custplus,custminus,driverplus,driverminus,reserve,tolls,etc,oil
+			,wmoney,wmoneycar,wmoneyplate,cmoney,dmoney,emoney,ticket,bonus,tax,depreciation,driverpay)
+		select '7','1'
+			,case when len(isnull(b.caryear,''))>0 then '1' else '2' end+isnull(b.caryear,'')+a.carno
+			,isnull(b.carkindno,''),ISNULL(c.kind,''),ISNULL(a.trandate,''),ISNULL(a.custno,''),ISNULL(e.nick,'')
+			,ISNULL(a.carno,''),ISNULL(a.driverno,''),ISNULL(d.namea,'')
+			,ISNULL(a.insures,0),ISNULL(a.money1,0),ISNULL(a.money2,0)
+			,ISNULL(a.custplus,0),ISNULL(a.custminus,0),ISNULL(a.driverplus,0),ISNULL(a.driverminus,0)
+			,ISNULL(a.reserve,0),ISNULL(a.tolls,0),ISNULL(a.etc,0),ISNULL(a.oil,0)
+			,ISNULL(a.wmoney,0),ISNULL(a.wmoneycar,0),ISNULL(a.wmoneyplate,0),ISNULL(a.cmoney,0),ISNULL(a.dmoney,0),ISNULL(a.emoney,0)
+			,ISNULL(a.ticket,0),ISNULL(a.bonus,0),ISNULL(a.tax,0),ISNULL(a.depreciation,0) 
+			,isnull(a.driverpay,0)
+		from trans_sum a
+		left join car2 b on a.carno=b.carno
+		left join carkind c on b.carkindno=c.noa
+		left join driver d on a.driverno=d.noa
+		left join cust e on a.custno=e.noa
+		where a.mon between @t_bmon and @t_emon
+		and b.cartype = '2' --公司車
+		and isnull(a.driverno,'') between @t_bdriverno and @t_edriverno
+		and (len(@t_carno)=0 or (len(ISNULL(b.carno,''))>0 and CHARINDEX(','+b.carno+',',','+@t_carno+',')>0))
+		and (len(@t_carkind)=0 or (len(ISNULL(b.carkindno,''))>0 and CHARINDEX(','+b.carkindno+',',','+@t_carkind+',')>0))
+		order by a.trandate
+	end
+	----------------------------------------------------------------------------------------------------
+	declare @n int
+	declare @carkindno nvarchar(20)
+	declare @carkind nvarchar(20)
+	
+	declare cursor_table cursor for
+	select carkindno,carkind,count(1) from @tmp group by carkindno,carkind
+	open cursor_table
+	fetch next from cursor_table
+	into @carkindno,@carkind,@n
+	while(@@FETCH_STATUS <> -1)
+	begin		
+		while @n%@t_pageline !=0
+		begin
+			insert into @tmp(gno,pno,rno,carkindno,carkind)
+			values('3','3',CHAR(255),@carkindno,@carkind)
+			set @n=@n+1
+		end
+		
+		fetch next from cursor_table
+		into @carkindno,@carkind,@n
+	end
+	close cursor_table
+	deallocate cursor_table
+	
+	select *
+	,caryear m01
+	,cast(round(oilrate,0) as nvarchar)+'%' m02
+	,cast(kl as decimal(15,1)) m03
+	,carday m04
+	,carno m05
+	,driver m06
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,money1),1)),4,12))  m07
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,custplus),1)),4,12))  m08
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,custminus),1)),4,12))  m09
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,money2),1)),4,12))  m10
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,driverplus),1)),4,12))  m11
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,driverminus),1)),4,12))  m12
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,reserve),1)),4,12))  m13
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,isnull(tolls,0)+ISNULL(etc,0)),1)),4,12))  m14
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,oil),1)),4,12))  m15
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(wmoney,0)),1)),4,12))  m16
+	--,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,wmoneycar),1)),4,12))  ma16
+	--,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,wmoneyplate),1)),4,12))  mb16
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(cmoney,0)),1)),4,12))  m17
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(dmoney,0)),1)),4,12))  m18
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ISNULL(emoney,0)),1)),4,12))  m19
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,ticket),1)),4,12))  m18
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,bonus),1)),4,12)) m19
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,tax),1)),4,12))  m20
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,depreciation),1)),4,12))  m21
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,insures),1)),4,12))  m22
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,profit),1)),4,12))  m24
+--	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,driverpay),1)),4,12))  m25
+	from @tmp 
+	order by case when len(carkindno)=0 then CHAR(255) else carkindno end
+		,pno
+		,rno
+		,caryear
+		,case when len(carno)=0 then CHAR(255) else carno end
+		;
+z_tran_ef09:--z_tran_ef09	
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max)
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'
+	declare @t_bdate nvarchar(10)= case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(10)= case when '#non'=[3] then char(255) else [3] end
+	declare @t_btrandate nvarchar(10)= case when '#non'=[4] then '' else [4] end
+	declare @t_etrandate nvarchar(10)= case when '#non'=[5] then char(255) else [5] end
+	declare @t_bcustno nvarchar(20)= case when '#non'=[8] then '' else [8] end
+	declare @t_ecustno nvarchar(20)=  case when '#non'=[9] then char(255) else [9] end
+	declare @t_bdriverno nvarchar(20)= case when '#non'=[10] then '' else [10] end
+	declare @t_edriverno nvarchar(20)=  case when '#non'=[11] then char(255) else [11] end
+	declare @t_carno nvarchar(20)= case when '#non'=[12] then '' else [12] end
+	declare @t_po nvarchar(20) = case when '#non'=[13] then '' else [13] end
+	declare @t_baddr nvarchar(20)= case when '#non'=[14] then '' else [14] end
+	declare @t_eaddr nvarchar(20)= case when '#non'=[15] then '' else [15] end
+	declare @t_carkind  nvarchar(max) = case when '#non'=[16] then '' else [16] end
+	declare @t_carteam  nvarchar(max) = case when '#non'=[17] then '' else [17] end
+	declare @t_calctype  nvarchar(max)= case when '#non'=[18] then '' else [18] end
+	----------------------------------------------------------------------------------------------
+	--解析要計算的種類
+	declare @string nvarchar(max)
+	declare @n int
+	IF OBJECT_ID('tempdb..#carkind')is not null
+	BEGIN
+		set @cmd = 'drop table #carkind'
+		EXECUTE sp_executesql @cmd
+	END
+	create table #carkind(
+		noa nvarchar(20)
+	)
+	set @string = @t_carkind
+	while(1=1)
+	begin
+		set @n = PATINDEX('%,%',@string)
+		if @n=0
+		begin
+			if LEN(@string)>0
+			begin
+				insert into #carkind select @string
+			end
+			break
+		end
+		insert into #carkind select LEFT(@string,@n-1)	
+		set @string = SUBSTRING(@string,@n+1,LEN(@string)-@n)
+	end
+	
+	IF OBJECT_ID('tempdb..#carteam')is not null
+	BEGIN
+		set @cmd = 'drop table #carteam'
+		EXECUTE sp_executesql @cmd
+	END
+	create table #carteam(
+		noa nvarchar(20)
+	)
+	set @string = @t_carteam
+	while(1=1)
+	begin
+		set @n = PATINDEX('%,%',@string)
+		if @n=0
+		begin
+			if LEN(@string)>0
+			begin
+				insert into #carteam select @string
+			end
+			break
+		end
+		insert into #carteam select LEFT(@string,@n-1)	
+		set @string = SUBSTRING(@string,@n+1,LEN(@string)-@n)
+	end
+	
+	IF OBJECT_ID('tempdb..#calctype')is not null
+	BEGIN
+		set @cmd = 'drop table #calctype'
+		EXECUTE sp_executesql @cmd
+	END
+	create table #calctype(
+		noa nvarchar(20)
+	)
+	set @string = @t_calctype
+	while(1=1)
+	begin
+		set @n = PATINDEX('%,%',@string)
+		if @n=0
+		begin
+			if LEN(@string)>0
+			begin
+				insert into #calctype select @string
+			end
+			break
+		end
+		insert into #calctype select LEFT(@string,@n-1)	
+		set @string = SUBSTRING(@string,@n+1,LEN(@string)-@n)
+	end
+	
+	----------------------------------------------------------------------------------------------
+	declare @count int
+	declare @mount float
+	declare @total float
+	declare @mount2 float
+	declare @total2 float
+	declare @drivermoney float
+	declare @inmount float
+	declare @pton float
+	declare @outmount float
+	declare @pton2 float
+	declare @driverno nvarchar(20)
+	declare @carno nvarchar(20)
+	declare @noa nvarchar(20)
+	declare @x_key nvarchar(20)
+	----------------------------------------------------------------------------------------------
+	IF OBJECT_ID('tempdb..#z_tran03')is not null
+	BEGIN
+		set @cmd = 'drop table #z_tran03'
+		EXECUTE sp_executesql @cmd
+	END
+	create table #z_tran03(
+		gno nvarchar(3),
+		trandate nvarchar(10),
+		datea nvarchar(10),
+		custno nvarchar(20),
+		comp nvarchar(40),		
+		driverno nvarchar(20),
+		namea nvarchar(20),
+		carno nvarchar(20),
+		straddrno nvarchar(20),
+		straddr nvarchar(40),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(40),
+		product nvarchar(40),
+		inmount float,
+		pton float,
+		mount decimal(15,3),
+		price decimal(15,3),
+		total float,
+		outmount decimal(15,3),
+		pton2 decimal(15,3),
+		mount2 decimal(15,3),
+		price2 decimal(15,3),
+		price3 decimal(15,3),
+		discount decimal(15,3),
+		total2 float,
+		drivermoney float,
+		po nvarchar(30),
+		caseno nvarchar(30),
+		cc  nvarchar(20),
+		tt  nvarchar(20),
+		noa  nvarchar(20),
+		carcount int,
+		ordeno nvarchar(max),
+		sender nvarchar(max),
+		stel nvarchar(max),
+		saddr nvarchar(max),
+		addressee nvarchar(max),
+		atel nvarchar(max),
+		aaddr nvarchar(max),
+		tggno nvarchar(max),
+		tgg nvarchar(max),
+		unit nvarchar(20),
+		miles float,
+		driver nvarchar(40)
+	)
+	insert into #z_tran03
+	select '0',a.trandate,a.datea,a.custno,left(a.comp,4),a.driverno,a.driver,a.carno
+		,a.straddrno,a.straddr
+		,a.endaddrno,a.endaddr
+		,a.product,
+		 a.inmount,a.pton,a.mount,a.price,a.total,a.outmount,a.pton2,a.mount2,a.price2,a.price3,a.discount,a.total2,round((price2+price3)*mount2,0)
+		,a.po,a.caseno,e.typea,d.team,a.noa,0,a.ordeno
+		,sender,stel,saddr,addressee,atel,aaddr,a.tggno,f.nick,a.unit,a.miles,a.driver
+		 from  view_transef a
+		 left join #carteam  b on a.carteamno=b.noa
+		 left join #calctype c on a.calctype=c.noa
+		 left join carteam  d on a.carteamno=d.noa
+		 left join calctypes e on a.calctype=e.noa+e.noq
+		 left join tgg f on a.tggno=f.noa
+		 where a.carteamno = '02' and
+		 (a.datea  between  @t_bdate  and  @t_edate) and 
+		 (a.trandate  between  @t_btrandate  and  @t_etrandate) and 
+		 (isnull(a.custno,'')  between  @t_bcustno   and  @t_ecustno) and 
+		 (isnull(a.driverno,'')  between  @t_bdriverno   and  @t_edriverno) and 
+		 (len(@t_carno)=0  or  a.carno=@t_carno) and 
+		 (len(@t_po)=0  or  a.po=@t_po) and 
+		 (len(@t_baddr)=0  or  charindex(@t_baddr,a.straddr)>0) and
+		 (len(@t_eaddr)=0  or  charindex(@t_eaddr,a.endaddr)>0)
+		 and (cast(@t_rank as int)>=6 or isnull(a.worker,'')=@t_user)
+		-- and (b.noa  is  not  null) and (c.noa  is  not  null)
+		 order  by  a.trandate,a.noa
+
+	select  *
+		,@t_user uu
+		,ROW_NUMBER()over(order by a.datea,a.noa) rr
+		,a.datea a01
+		,a.trandate a02
+		,a.custno a03
+		,b.nick b01
+		,a.po a04
+		,a.unit a05
+		,cast(a.price as decimal(15,0))a06
+		,cast(a.inmount as decimal(15,0)) a07
+		,cast(a.pton as decimal(15,0))a08
+		,a.sender a09
+		,a.stel a10
+		,a.saddr a11
+		,a.straddr a12
+		,a.addressee a13
+		,a.atel a14
+		,a.aaddr a15
+		,a.endaddr a16
+		,cast(a.miles  as decimal(15,0))a17
+		,a.tgg a18
+		,a.driver a19
+		,cast(isnull(a.price2,0)+ISNULL(a.price3,0) as decimal(15,0))a20
+		from  #z_tran03  a
+		left join cust b on a.custno=b.noa
+		order  by a.datea,a.noa
+
+	drop table #z_tran03
+	drop table #carkind
+	drop table #calctype
+	drop table #carteam;		
+z_tran_ef01:--z_tran_ef01	
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max)
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'
+	declare @t_bdate nvarchar(10)= case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(10)= case when '#non'=[3] then char(255) else [3] end
+	declare @t_btrandate nvarchar(10)= case when '#non'=[4] then '' else [4] end
+	declare @t_etrandate nvarchar(10)= case when '#non'=[5] then char(255) else [5] end
+	declare @t_bcustno nvarchar(20)= case when '#non'=[8] then '' else [8] end
+	declare @t_ecustno nvarchar(20)=  case when '#non'=[9] then char(255) else [9] end
+	declare @t_bdriverno nvarchar(20)= case when '#non'=[10] then '' else [10] end
+	declare @t_edriverno nvarchar(20)=  case when '#non'=[11] then char(255) else [11] end
+	declare @t_carno nvarchar(20)= case when '#non'=[12] then '' else [12] end
+	declare @t_po nvarchar(20) = case when '#non'=[13] then '' else [13] end
+	declare @t_baddr nvarchar(20)= case when '#non'=[14] then '' else [14] end
+	declare @t_eaddr nvarchar(20)= case when '#non'=[15] then '' else [15] end
+	declare @t_carkind  nvarchar(max) = case when '#non'=[16] then '' else [16] end
+	declare @t_carteam  nvarchar(max) = case when '#non'=[17] then '' else [17] end
+	declare @t_calctype  nvarchar(max)= case when '#non'=[18] then '' else [18] end
+	----------------------------------------------------------------------------------------------
+	--解析要計算的種類
+	declare @string nvarchar(max)
+	declare @n int
+	IF OBJECT_ID('tempdb..#carkind')is not null
+	BEGIN
+		set @cmd = 'drop table #carkind'
+		EXECUTE sp_executesql @cmd
+	END
+	create table #carkind(
+		noa nvarchar(20)
+	)
+	set @string = @t_carkind
+	while(1=1)
+	begin
+		set @n = PATINDEX('%,%',@string)
+		if @n=0
+		begin
+			if LEN(@string)>0
+			begin
+				insert into #carkind select @string
+			end
+			break
+		end
+		insert into #carkind select LEFT(@string,@n-1)	
+		set @string = SUBSTRING(@string,@n+1,LEN(@string)-@n)
+	end
+	
+	IF OBJECT_ID('tempdb..#carteam')is not null
+	BEGIN
+		set @cmd = 'drop table #carteam'
+		EXECUTE sp_executesql @cmd
+	END
+	create table #carteam(
+		noa nvarchar(20)
+	)
+	set @string = @t_carteam
+	while(1=1)
+	begin
+		set @n = PATINDEX('%,%',@string)
+		if @n=0
+		begin
+			if LEN(@string)>0
+			begin
+				insert into #carteam select @string
+			end
+			break
+		end
+		insert into #carteam select LEFT(@string,@n-1)	
+		set @string = SUBSTRING(@string,@n+1,LEN(@string)-@n)
+	end
+	
+	IF OBJECT_ID('tempdb..#calctype')is not null
+	BEGIN
+		set @cmd = 'drop table #calctype'
+		EXECUTE sp_executesql @cmd
+	END
+	create table #calctype(
+		noa nvarchar(20)
+	)
+	set @string = @t_calctype
+	while(1=1)
+	begin
+		set @n = PATINDEX('%,%',@string)
+		if @n=0
+		begin
+			if LEN(@string)>0
+			begin
+				insert into #calctype select @string
+			end
+			break
+		end
+		insert into #calctype select LEFT(@string,@n-1)	
+		set @string = SUBSTRING(@string,@n+1,LEN(@string)-@n)
+	end
+	
+	----------------------------------------------------------------------------------------------
+	declare @count int
+	declare @mount float
+	declare @total float
+	declare @mount2 float
+	declare @total2 float
+	declare @drivermoney float
+	declare @inmount float
+	declare @pton float
+	declare @outmount float
+	declare @pton2 float
+	declare @driverno nvarchar(20)
+	declare @carno nvarchar(20)
+	declare @noa nvarchar(20)
+	declare @x_key nvarchar(20)
+	----------------------------------------------------------------------------------------------
+	IF OBJECT_ID('tempdb..#z_tran03')is not null
+	BEGIN
+		set @cmd = 'drop table #z_tran03'
+		EXECUTE sp_executesql @cmd
+	END
+	create table #z_tran03(
+		gno nvarchar(3),
+		trandate nvarchar(10),
+		datea nvarchar(10),
+		custno nvarchar(20),
+		comp nvarchar(40),		
+		driverno nvarchar(20),
+		namea nvarchar(20),
+		carno nvarchar(20),
+		straddrno nvarchar(20),
+		straddr nvarchar(40),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(40),
+		product nvarchar(40),
+		inmount float,
+		pton float,
+		mount decimal(15,3),
+		price decimal(15,3),
+		total float,
+		outmount decimal(15,3),
+		pton2 decimal(15,3),
+		mount2 decimal(15,3),
+		price2 decimal(15,3),
+		price3 decimal(15,3),
+		discount decimal(15,3),
+		total2 float,
+		drivermoney float,
+		po nvarchar(30),
+		caseno nvarchar(30),
+		cc  nvarchar(20),
+		tt  nvarchar(20),
+		accy nvarchar(10),
+		noa  nvarchar(20),
+		carcount int,
+		ordeno nvarchar(max),
+		sender nvarchar(max),
+		stel nvarchar(max),
+		saddr nvarchar(max),
+		addressee nvarchar(max),
+		atel nvarchar(max),
+		aaddr nvarchar(max),
+		tggno nvarchar(max),
+		tgg nvarchar(max),
+		unit nvarchar(20),
+		miles float,
+		driver nvarchar(40),
+		memo nvarchar(max)
+	)
+	insert into #z_tran03
+	select '0',a.trandate,a.datea,a.custno,left(a.comp,4),a.driverno,a.driver,a.carno
+		,a.straddrno,a.straddr
+		,a.endaddrno,a.endaddr
+		,a.product,
+		 a.inmount,a.pton,a.mount,a.price,a.total,a.outmount,a.pton2,a.mount2,a.price2,a.price3,a.discount,a.total2,round((price2+price3)*mount2,0)
+		,a.po,a.caseno,e.typea,d.team,a.accy,a.noa,0,a.ordeno
+		,a.sender,a.stel,a.saddr,a.addressee,a.atel,a.aaddr,a.tggno,f.nick,a.unit,a.miles,a.driver
+		,a.memo
+		 from  view_transef a
+		 left join #carteam  b on a.carteamno=b.noa
+		 left join #calctype c on a.calctype=c.noa
+		 left join carteam  d on a.carteamno=d.noa
+		 left join calctypes e on a.calctype=e.noa+e.noq
+		 left join tgg f on a.tggno=f.noa
+		 where isnull(a.carteamno,'') != '02' 
+		 and isnull(a.carteamno,'') between '01' and '07' 
+		 and (a.datea  between  @t_bdate  and  @t_edate) and 
+		 (a.trandate  between  @t_btrandate  and  @t_etrandate) and 
+		 (a.custno  between  @t_bcustno   and  @t_ecustno) and 
+		 (a.driverno  between  @t_bdriverno   and  @t_edriverno) and 
+		 (len(@t_carno)=0  or  a.carno=@t_carno) and 
+		 (len(@t_po)=0  or  a.po=@t_po) and 
+		 (len(@t_baddr)=0  or  a.straddrno=@t_baddr) and
+		 (len(@t_eaddr)=0  or  a.endaddrno=@t_eaddr)
+		 and (cast(@t_rank as int)>=6 or isnull(a.worker,'')=@t_user)
+		-- and (b.noa  is  not  null) and (c.noa  is  not  null)
+		 order  by  a.trandate,a.noa
+
+	select  'transef?noa=$noa?'+a.accy qhref
+		,a.*
+		,@t_user uu
+		,ROW_NUMBER()over(order by a.datea,a.noa) rr
+		,a.datea a01
+		,a.trandate a02
+		,a.custno a03
+		,b.nick b01
+		,a.po a04
+		,a.unit a05
+		,cast(a.price as decimal(15,0))a06
+		,cast(a.inmount as decimal(15,0)) a07
+		,cast(a.pton as decimal(15,0))a08
+		,a.sender a09
+		,a.stel a10
+		,a.saddr a11
+		,a.straddr a12
+		,a.addressee a13
+		,a.atel a14
+		,a.aaddr a15
+		,a.endaddr a16
+		,cast(a.miles  as decimal(15,0))a17
+		,a.tgg a18
+		,a.driver a19
+		,cast(isnull(a.price2,0)+ISNULL(a.price3,0) as decimal(15,0))a20
+		,a.memo a21
+		from  #z_tran03  a
+		left join cust b on a.custno=b.noa
+		order  by a.datea,a.noa
+
+	drop table #z_tran03
+	drop table #carkind
+	drop table #calctype
+	drop table #carteam;
+
+z_tran_ef05:--z_tran_ef05
+	SET QUOTED_IDENTIFIER OFF	
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'
+	declare @t_bdate nvarchar(20) = case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(20) = case when '#non'=[3] then char(255) else [3] end
+	declare @t_bcustno nvarchar(20) = case when '#non'=[8] then '' else [8] end
+	declare @t_ecustno nvarchar(20) = case when '#non'=[9] then char(255) else [9] end
+	-----------------------------------------------------------------
+	declare @tmpa table(
+		recno int,
+		custno nvarchar(20),
+		cust nvarchar(50),
+		nick nvarchar(20),
+		
+		accy nvarchar(20),
+		noa nvarchar(20),
+		noq nvarchar(10),
+		
+		datea nvarchar(10),
+		trandate nvarchar(10),
+		straddrno nvarchar(20),
+		straddr nvarchar(50),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(50),
+		productno nvarchar(20),
+		product nvarchar(50),
+		carno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(20),
+		total float,
+		miles float
+	)
+	
+	insert into @tmpa(recno,custno,cust,nick,accy,noa,noq
+		,datea,trandate,straddrno,straddr,endaddrno,endaddr,productno,product
+		,carno,driverno,driver,total,miles)
+	select ROW_NUMBER()over(partition by custno order by trandate),custno
+		,comp,nick,accy,noa,noq
+		,datea,trandate,straddrno,straddr,endaddrno,endaddr,uccno,product
+		,carno,driverno,driver,total,miles 
+	from view_transef
+	where custno between @t_bcustno and @t_ecustno
+	and datea between @t_bdate and @t_edate
+	order by custno,trandate
+	
+	------------------------------------------------------------------------------------
+	declare @tmpb table(
+		recno int,
+		noa nvarchar(20),
+		custno nvarchar(20),
+		datea nvarchar(10),
+		custchgno nvarchar(20),
+		item nvarchar(max),
+		memo nvarchar(max),
+		itemmoney float
+	)
+	insert into @tmpb(recno,noa,custno,datea,custchgno,item,memo,itemmoney)
+	select ROW_NUMBER()over(partition by custno order by datea)
+		,noa,custno,datea,noa
+		,ISNULL(plusitem,'')+ISNULL(minusitem,''),memo
+		,isnull(plusmoney,0)-isnull(minusmoney,0)
+	from custchg
+	where not(ISNULL(plusmoney,0)=0 and ISNULL(minusmoney,0)=0)
+	and custno between @t_bcustno and @t_ecustno
+	and datea between @t_bdate and @t_edate
+	order by custno,datea
+	-----------------------------------------------------------------------------
+	declare @tmp table(
+		recno int,
+		gno nvarchar(10),
+		
+		accy nvarchar(20),
+		tablea nvarchar(50),
+		noa nvarchar(20),
+		noq nvarchar(10),
+		custno nvarchar(20),
+		cust nvarchar(40),
+		nick nvarchar(20),
+		serial nvarchar(20),
+		
+		trandate nvarchar(20),
+		straddrno nvarchar(20),
+		straddr nvarchar(50),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(50),
+		miles float,
+		tranmoney float,
+		
+		custchgdate nvarchar(20),
+		item nvarchar(max),
+		itemmoney float,
+		
+		total float                 
+	)
+	insert into @tmp(recno,gno,accy,tablea,noa,noq,custno,cust,nick,serial
+		,trandate,straddrno,straddr,endaddrno,endaddr,tranmoney
+	    ,custchgdate,item,itemmoney)
+	select ROW_NUMBER()over(order by isnull(custno,''),gno,trandate) recno
+		,gno,accy,tablea,noa,noq,isnull(custno,''),isnull(comp,''),isnull(nick,''),isnull(serial,'')
+		,trandate,straddrno,straddr,endaddrno,endaddr,total
+	    ,custchgdate,item,itemmoney
+	from(
+	select '1' gno,a.accy,'transef' tablea,a.noa,a.noq,a.custno,b.comp,b.nick,b.serial
+		,a.trandate,a.straddrno,a.straddr,a.endaddrno,a.endaddr,a.total
+		,'' custchgdate,'' item,0 itemmoney
+	from @tmpa a
+	left join cust b on a.custno=b.noa
+	where (cast(@t_rank as int)>=6 or isnull(b.worker,'')=@t_user)
+	union all
+	select '2' gno,'','custchg',a.noa,'',a.custno,b.comp,b.nick,b.serial
+		,'','','','','',0
+		,a.datea,a.item,a.itemmoney
+	from @tmpb a
+	left join cust b on a.custno=b.noa
+	where (cast(@t_rank as int)>=6 or isnull(b.worker,'')=@t_user)
+	) a
+	
+	order by isnull(custno,''),gno,recno
+	
+	insert into @tmp(gno,custno,cust,nick,serial
+		,tranmoney,itemmoney,total)
+	select '3',custno,cust,nick,serial
+		,SUM(isnull(tranmoney,0)),sum(isnull(itemmoney,0)),SUM(isnull(tranmoney,0)+isnull(itemmoney,0)) 
+	from @tmp 
+	where gno='1' or gno = '2'
+	group by custno,cust,nick,serial
+	
+	insert into @tmp(gno,custno,tranmoney,itemmoney,total)
+	select '4',CHAR(255)
+		,SUM(isnull(tranmoney,0)),sum(isnull(itemmoney,0)),SUM(isnull(tranmoney,0)+isnull(itemmoney,0)) 
+	from @tmp 
+	where gno='1' or gno = '2'
+	
+	----------------------------------------------------------------------------------------------
+	select recno rr
+	,tablea+"?noa=\'"+noa+"\' and "+cast(recno as nvarchar)+"=$rr?"+accy ghref
+	,dbo.getComma(tranmoney,0) tmm
+	,dbo.getComma(itemmoney,0) imm
+	,dbo.getComma(total,0) totmm
+	,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+straddr+'</a>' saddr
+	,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+endaddr+'</a>' eaddr
+	,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+item+'</a>' citem
+	,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+nick+'</a>' cnick
+	,* 
+	from @tmp order by isnull(custno,''),gno,recno;
+	
+z_tran_ef06:--z_tran_ef06	
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'
+	declare @t_bdate nvarchar(20) = case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(20) = case when '#non'=[3] then char(255) else [3] end
+	declare @t_bcustno nvarchar(20) = case when '#non'=[8] then '' else [8] end
+	declare @t_ecustno nvarchar(20) = case when '#non'=[9] then char(255) else [9] end
+	--------------------------------------------------------------------------------------------
+	declare @tmpa table(
+		custno nvarchar(20),
+		cust nvarchar(50),
+		nick nvarchar(20),
+		
+		total float
+	)
+	
+	insert into @tmpa(custno,cust,nick,total)
+	select a.custno,b.comp,b.nick,sum(isnull(a.total,0))
+	from view_transef a
+	left join cust b on a.custno=b.noa
+	where a.custno between @t_bcustno and @t_ecustno
+	and a.datea between @t_bdate and @t_edate
+	and (cast(@t_rank as int)>=6 or isnull(b.worker,'')=@t_user)
+	group by a.custno,b.comp,b.nick
+	------------------------------------------------------------------------------------
+	declare @tmpb table(
+		custno nvarchar(20),
+		cust nvarchar(50),
+		nick nvarchar(20),
+		plus float,
+		minus float
+	)
+	insert into @tmpb(custno,cust,nick,plus,minus)
+	select a.custno,b.comp,b.nick,sum(isnull(a.plusmoney,0)),sum(isnull(a.minusmoney,0))
+	from custchg a
+	left join cust b on a.custno=b.noa
+	where not(ISNULL(a.plusmoney,0)=0 and ISNULL(a.minusmoney,0)=0)
+	and a.custno between @t_bcustno and @t_ecustno
+	and a.datea between @t_bdate and @t_edate
+	and (cast(@t_rank as int)>=6 or isnull(b.worker,'')=@t_user)
+	group by a.custno,b.comp,b.nick
+	-----------------------------------------------------------------------------
+	declare @tmp table(
+		gno nvarchar(20),
+		pno nvarchar(20),
+
+		custno nvarchar(20),
+		cust nvarchar(50),
+		nick nvarchar(20),
+		
+		total float,
+		plus float,
+		minus float,
+		
+		totmoney float
+	)
+	insert into @tmp(gno,pno,custno,cust,nick,total)
+	select '1','1',custno,cust,nick,total from @tmpa where total!=0 order by custno
+	
+	update @tmp set plus=ISNULL(b.plus,0),minus=ISNULL(b.minus,0)
+	from @tmp a
+	left join @tmpb b on a.custno=b.custno
+	
+	insert into @tmp(gno,pno,custno,cust,nick,plus,minus)
+	select '1','1',custno,cust,nick,plus,minus from @tmpb a 
+	where not exists(select * from @tmp where custno=a.custno)
+	
+	insert into @tmp(gno,pno,total,plus,minus)
+	select '2','2',sum(isnull(total,0)),sum(isnull(plus,0)),sum(isnull(minus,0)) from @tmp
+	
+	update @tmp set totmoney=ISNULL(total,0)+ISNULL(plus,0)-isnull(minus,0)
+	
+	select * 
+	,'應收帳款總表（'+@t_bdate+'～'+@t_edate+'）' titlea
+	,ROW_NUMBER()over(order by pno,custno) a1
+	,custno a2
+	,nick a3
+	,dbo.getComma(total,0) a4
+	,dbo.getComma(plus,0) a5
+	,dbo.getComma(minus,0) a6
+	,dbo.getComma(totmoney,0) a7
+	from @tmp order by pno,custno;
+	
+z_tran_ef07:--z_tran_ef07
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'	
+	declare @t_bdate nvarchar(20) = case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(20) = case when '#non'=[3] then char(255) else [3] end
+	declare @t_bdriverno nvarchar(20) = case when '#non'=[10] then '' else [10] end
+	declare @t_edriverno nvarchar(20) = case when '#non'=[11] then char(255) else [11] end
+	-----------------------------------------------------------------
+	declare @t_pageline int=38
+	-----------------------------------------------------------------
+	declare @tmpa table(
+		recno int,
+		driverno nvarchar(20),
+		driver nvarchar(50),
+		
+		tranaccy nvarchar(10),
+		tranno nvarchar(20),
+		trannoq nvarchar(10),
+		datea nvarchar(10),
+		trandate nvarchar(10),
+		straddrno nvarchar(20),
+		straddr nvarchar(50),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(50),
+		productno nvarchar(20),
+		product nvarchar(50),
+		carno nvarchar(20),
+		custno nvarchar(20),
+		cust nvarchar(40),
+		mount2 float,
+		price2 float,
+		price3 float,
+		total2 float,
+		miles float
+	)
+	
+	insert into @tmpa(recno,driverno,driver,tranaccy,tranno,trannoq
+		,datea,trandate,straddrno,straddr,endaddrno,endaddr,productno,product
+		,carno,custno,cust,mount2,price2,price3,total2,miles)
+	select ROW_NUMBER()over(partition by driverno order by trandate)
+		,driverno,driver,accy,noa,noq
+		,datea,trandate,straddrno,straddr,endaddrno,endaddr,uccno,product
+		,carno,custno,nick,mount2,price2,price3,total2,miles 
+	from view_transef
+	where driverno between @t_bdriverno and @t_edriverno
+	and datea between @t_bdate and @t_edate
+	and (cast(@t_rank as int)>=6)
+	order by driverno,trandate
+	------------------------------------------------------------------------------------
+	declare @tmpb table(
+		recno int,
+		driverno nvarchar(20),
+		datea nvarchar(10),
+		custchgno nvarchar(20),
+		carno nvarchar(20),
+		item nvarchar(max),
+		memo nvarchar(max),
+		itemmoney float
+	)
+	insert into @tmpb(recno,driverno,datea,custchgno,carno,item,memo,itemmoney)
+	select ROW_NUMBER()over(partition by driverno order by datea)
+		,driverno,datea,noa,carno
+		,ISNULL(plusitem,'')+ISNULL(minusitem,''),memo
+		,isnull(plusmoney,0)-isnull(minusmoney,0)
+	from carchg
+	where not(ISNULL(plusmoney,0)=0 and ISNULL(minusmoney,0)=0)
+	and driverno between @t_bdriverno and @t_edriverno
+	and datea between @t_bdate and @t_edate
+	and (cast(@t_rank as int)>=6)
+	order by driverno,datea
+	-----------------------------------------------------------------------------
+	declare @driverno nvarchar(20)
+	declare @n int
+	declare @miles float
+	declare @times float
+	declare @totmoney float
+	
+	declare @tmp table(
+		gno nvarchar(20),
+		pno nvarchar(20),
+		recno int,
+		custno nvarchar(20),
+		comp nvarchar(50),
+		nick nvarchar(20),
+		tranaccy nvarchar(10),
+		tranno nvarchar(20),
+		trannoq nvarchar(10),
+		trandate nvarchar(10),
+		carno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(40),
+		straddrno nvarchar(20),
+		straddr nvarchar(50),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(50),
+		miles float,
+		mount float,
+		price float,
+		total float,
+		
+		custchgno nvarchar(20),
+		datea nvarchar(10),
+		item nvarchar(max),
+		memo nvarchar(max),
+		itemmoney float,
+		
+		tottimes float,
+		totmiles float,
+		totmoney float
+	)
+	
+	declare cursor_table cursor for
+	select driverno from @tmpa
+	union
+	select driverno from @tmpb
+	order by driverno
+	open cursor_table
+	fetch next from cursor_table
+	into @driverno
+	while(@@FETCH_STATUS <> -1)
+	begin
+		insert into @tmp(gno,pno,recno,custno,tranaccy,tranno,trannoq,trandate,datea
+			,carno,driverno,driver,straddrno,straddr,endaddrno,endaddr
+			,miles,mount,price,total)
+		select '1','1',recno,custno,tranaccy,tranno,trannoq,trandate,datea
+			,carno,driverno,driver,straddrno,straddr,endaddrno,endaddr
+			,miles,mount2,isnull(price2,0)+isnull(price3,0),total2 
+		from @tmpa where driverno=@driverno
+	
+		set @n=0
+		select @n=MAX(recno) from @tmpa where driverno=@driverno
+		set @n = ISNULL(@n,0)
+		
+		insert into @tmp(gno,pno,recno,driverno,custchgno,datea,carno
+			,item,memo,itemmoney)
+		select '2','2',recno+@n,driverno,custchgno,datea,carno
+			,item,memo,itemmoney from @tmpb where driverno=@driverno
+		
+		select @miles = SUM(ISNULL(miles,0)) from @tmp where pno='1' and driverno=@driverno
+		select @times = SUM(1) from @tmp where pno='1' and driverno=@driverno
+		select @totmoney = SUM(ISNULL(total,0)+ISNULL(itemmoney,0)) from @tmp where (pno='1' or pno='2') and driverno=@driverno
+		
+		insert into @tmp(gno,pno,driverno,totmiles,tottimes,totmoney)
+		values('4','4',@driverno,@miles,@times,@totmoney)
+		
+		fetch next from cursor_table
+		into @driverno
+	end
+	close cursor_table
+	deallocate cursor_table
+	----------------------------------------------------------------------------------
+	declare cursor_table cursor for
+	select driverno,count(1) from @tmp group by driverno
+	open cursor_table
+	fetch next from cursor_table
+	into @driverno,@n
+	while(@@FETCH_STATUS <> -1)
+	begin	
+		while @n%@t_pageline!=0
+		begin
+			set @n = @n + 1
+			insert into @tmp(gno,pno,recno,driverno)values('3','3',@n,@driverno)
+		end	
+		fetch next from cursor_table
+		into @driverno,@n
+	end
+	close cursor_table
+	deallocate cursor_table
+
+	update @tmp set comp=b.comp,nick=b.nick,driver=c.namea
+	from @tmp a
+	left join cust b on a.custno=b.noa
+	left join driver c on a.driverno=c.noa
+	
+	select * 
+	,'應付帳款明細表（'+@t_bdate+'～'+@t_edate+'）' titlea
+	,driverno ddno
+	,custno ccno
+	,recno a1
+	,datea a2
+	,carno a3
+	,isnull(straddr,'')+isnull(endaddr,'')  a4
+	,endaddr a5
+	,miles a6
+	,mount a7
+	,price a8
+	,dbo.getComma(total,0) a9
+	,datea b1
+	,item b2
+	,memo b3
+	,dbo.getComma(itemmoney,0) b4
+	,tottimes c1
+	,dbo.getComma(totmiles,0) c2
+	,dbo.getComma(totmoney,0) c3
+	from @tmp order by driverno,pno,recno;
+	
+
+z_tran_ef08:--z_tran_ef08	
+	declare @t_rank nvarchar(20) = '[24]'
+	declare @t_user nvarchar(20) = '[1]'
+	declare @t_bdate nvarchar(20) = case when '#non'=[2] then '' else [2] end
+	declare @t_edate nvarchar(20) = case when '#non'=[3] then char(255) else [3] end
+	declare @t_bdriverno nvarchar(20) = case when '#non'=[10] then '' else [10] end
+	declare @t_edriverno nvarchar(20) = case when '#non'=[11] then char(255) else [11] end
+	-----------------------------------------------------------------
+	declare @tmpa table(
+		driverno nvarchar(20),
+		driver nvarchar(40),
+		total2 float
+	)
+	
+	insert into @tmpa(driverno,driver,total2)
+	select a.driverno,b.namea,sum(isnull(a.total2,0))
+	from view_transef a
+	left join driver b on a.driverno=b.noa
+	where a.driverno between @t_bdriverno and @t_edriverno
+	and a.datea between @t_bdate and @t_edate
+	and (cast(@t_rank as int)>=6)
+	group by a.driverno,b.namea
+	------------------------------------------------------------------------------------
+	declare @tmpb table(
+		driverno nvarchar(20),
+		driver nvarchar(40),
+		plus float,
+		minus float
+	)
+	insert into @tmpb(driverno,driver,plus,minus)
+	select a.driverno,b.namea,sum(isnull(a.plusmoney,0)),sum(isnull(a.minusmoney,0))
+	from carchg a
+	left join driver b on a.driverno=b.noa
+	where not(ISNULL(plusmoney,0)=0 and ISNULL(minusmoney,0)=0)
+	and driverno between @t_bdriverno and @t_edriverno
+	and datea between @t_bdate and @t_edate
+	and (cast(@t_rank as int)>=6)
+	group by a.driverno,b.namea
+	-----------------------------------------------------------------------------
+	declare @tmp table(
+		gno nvarchar(20),
+		pno nvarchar(20),
+
+		driverno nvarchar(20),
+		driver nvarchar(40),
+		
+		total float,
+		plus float,
+		minus float,
+		
+		totmoney float
+	)
+	insert into @tmp(gno,pno,driverno,driver,total)
+	select '1','1',driverno,driver,total2 from @tmpa where total2!=0 order by driverno
+	
+	update @tmp set plus=ISNULL(b.plus,0),minus=ISNULL(b.minus,0)
+	from @tmp a
+	left join @tmpb b on a.driverno=b.driverno
+	
+	insert into @tmp(gno,pno,driverno,driver,plus,minus)
+	select '1','1',driverno,driver,plus,minus from @tmpb a 
+	where not exists(select * from @tmp where driverno=a.driverno)
+	
+	insert into @tmp(gno,pno,total,plus,minus)
+	select '2','2',sum(isnull(total,0)),sum(isnull(plus,0)),sum(isnull(minus,0)) from @tmp
+	
+	update @tmp set totmoney=ISNULL(total,0)+ISNULL(plus,0)-isnull(minus,0)
+	
+	select * 
+	,'應付帳款總表（'+@t_bdate+'～'+@t_edate+'）' titlea
+	,ROW_NUMBER()over(order by pno,driverno) a1
+	,driverno a2
+	,driver a3
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,total),1)),4,12)) a4
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,plus),1)),4,12)) a5
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,minus),1)),4,12)) a6
+	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,totmoney),1)),4,12)) a7
+	from @tmp order by pno,driverno;

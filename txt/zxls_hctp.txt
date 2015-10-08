@@ -1,0 +1,248 @@
+zxls_hctp:--zxls_hctp  峻富 棧板	 pallet 
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max)
+	declare @workerno nvarchar(max) = [1]
+	declare @worker nvarchar(max) = [2]
+	declare @filename nvarchar(max) = [3]
+	declare @curdate nvarchar(max) = convert(nvarchar,getDate(),120)
+	--------------------------------------------------------------------------------------
+	set @filename = REVERSE(replace(Upper(@filename),'HCTP',''))
+	set @filename = REVERSE(substring(@filename,charindex('.',@filename)+1,len(@filename)))
+	--------------------------------------------------------------------------------------
+	IF OBJECT_ID('tempdb..#z_hctp')is not null
+	BEGIN
+		drop table #z_hctp
+	END
+
+	create table #z_hctp(
+		isexist int,
+		accy nvarchar(10),
+		noa nvarchar(20),
+		carteamno nvarchar(20),
+		calctype nvarchar(20),
+		
+		custno nvarchar(20),
+		comp nvarchar(50),
+		nick nvarchar(20),
+		datea nvarchar(20),
+		po nvarchar(20),
+		straddrno nvarchar(20),
+		straddr nvarchar(50),
+		sender nvarchar(50),
+		addressee nvarchar(50),
+		atel nvarchar(50),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(50),
+		inmount float,
+		pton float,
+		aaddr nvarchar(50),
+		driverno nvarchar(20),
+		driver nvarchar(50),
+		trandate nvarchar(20),
+		unit nvarchar(20),
+		price float,
+		price2 float,
+		price3 float,
+		memo nvarchar(max)
+	)
+	declare @a nvarchar(max)
+	declare @b nvarchar(max)
+	declare @c nvarchar(max)
+	declare @d nvarchar(max)
+	declare @e nvarchar(max)
+	declare @f nvarchar(max)
+	declare @g nvarchar(max)
+	declare @h nvarchar(max)
+	declare @i nvarchar(max)
+	declare @j nvarchar(max)
+	declare @k nvarchar(max)
+	declare @l nvarchar(max)
+	declare @m nvarchar(max)
+	declare @n nvarchar(max)
+	declare @o nvarchar(max)
+	declare @p nvarchar(max)
+	declare @q nvarchar(max)
+	declare @r nvarchar(max)
+	declare @s nvarchar(max)
+	declare @t nvarchar(max)
+	
+	-----------------------------------------------------	
+	declare @t_date date
+	declare @number nvarchar(max)
+	declare @string nvarchar(max) = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	declare @nn int
+	declare @mm nvarchar(max)
+	declare @key nvarchar(max)
+	------------------------------------------------------
+	declare @accy nvarchar(20)
+	declare @noa nvarchar(20)
+	declare @carteamno nvarchar(20) = '02' --pallet
+	
+	declare @datea nvarchar(20)
+	declare @po nvarchar(20)
+	declare @straddrno nvarchar(20)
+	declare @straddr nvarchar(50)
+	declare @sender nvarchar(50)
+	declare @addressee nvarchar(50)
+	declare @atel nvarchar(50)
+	declare @endaddrno nvarchar(20)
+	declare @endaddr nvarchar(50)
+	declare @inmount float
+	declare @pton float
+	declare @aaddr nvarchar(50)
+	declare @driverno nvarchar(20)
+	declare @driver nvarchar(50)
+	declare @trandate nvarchar(20)
+	declare @unit nvarchar(20)
+	declare @price float
+	declare @price2 float
+	declare @price3 float
+	declare @memo nvarchar(max)
+	declare @isoutside bit
+	declare @calctype nvarchar(20)
+	declare @isexist bit
+	declare @custno nvarchar(20)
+	declare @comp nvarchar(50)
+	declare @nick nvarchar(20)
+	------------------------------------------------------
+	
+	declare cursor_table cursor for
+	select noa,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t
+	from ztmpxls 
+	where CAST(noa as int) !=1
+	order by CAST(noa as int)
+	open cursor_table
+	fetch next from cursor_table
+	into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t
+	while(@@FETCH_STATUS <> -1)
+	begin
+		--begin try
+			if ISDATE(@b)=1
+			begin
+			set @datea = dbo.AD2ChineseEraName( CAST(@b as datetime))
+			set @po = @c
+			set @straddrno = ''
+			set @straddr = @d
+			set @sender = @e
+			set @addressee = @f
+			set @atel = @g
+			set @endaddrno = @i
+			set @endaddr = @j
+			set @inmount = CAST(REPLACE(@k,',','') as float)
+			set @pton = CAST(REPLACE(@l,',','') as float)
+			set @aaddr = @m
+			set @driverno = ''
+			set @driver = @n
+			begin try
+				set @trandate = dbo.AD2ChineseEraName( CAST(@o as datetime))
+			end try
+			begin catch
+				set @trandate = @datea
+			end catch
+			set @unit = @p
+			
+			set @price2 = CAST(REPLACE(@q,',','') as float)
+			set @price3 = CAST(REPLACE(@q,',','') as float)
+			set @price = CAST(REPLACE(@r,',','') as float)
+			
+			set @custno = LTRIM(RTRIM(@s))
+			set @comp = LTRIM(RTRIM(@t))
+			set @nick = ''
+			select top 1 @nick = nick from cust where noa=@custno
+			------------------------------------------------------------------------------------------------
+			select @isoutside = 1,@calctype='B01'
+			select top 1 @driverno=noa,@isoutside=case when cartype='公司車' then 0 else 1 end
+			from driver where namea=@driver and len(@driver)>0
+			if @isoutside=1
+			begin
+				set @price2 = 0
+				set @calctype='B01'
+			end
+			else
+			begin
+				set @price3 = 0
+				set @calctype='A01'
+			end
+			-------------------------------------------------------------------------------------------------
+			set @memo=@filename+'_'+@a
+			select @accy=LEFT(@datea,3),@noa=''
+			select @accy=accy,@noa=noa from view_transef where memo=@memo and carteamno=@carteamno
+			if(LEN(ISNULL(@noa,''))=0)
+			begin
+				set @isexist = 0
+				select top 1 @noa = noa from view_transef where noa like 'BA'+REPLACE(@datea,'/','')+'[0-9,A-Z][0-9][0-9]' order by noa desc
+				select top 1 @noa = case when noa>isnull(@noa,'') then noa else @noa end from #z_hctp where noa like 'BA'+REPLACE(@datea,'/','')+'[0-9,A-Z][0-9][0-9]' order by noa desc
+				if LEN(ISNULL(@noa,'')) = 0
+					set @noa = 'BA'+REPLACE(@datea,'/','')+'000'
+				set @number  = right(@noa,3)				
+				set @nn = (charindex(left(@number,1),@string)-1) * 100 + cast(right(@number,2) as int) + 1
+				set @mm = substring(@string,floor(@nn/100)+1,1)
+				set @noa =  'BA'+REPLACE(@datea,'/','')+@mm+RIGHT('00'+cast(@nn as nvarchar),2)
+			end
+			else
+			begin
+				set @isexist = 1
+			end
+				insert into #z_hctp(isexist,accy,noa,carteamno,calctype,datea
+					,po,straddrno,straddr,sender,addressee,atel,endaddrno,endaddr
+					,inmount,pton,aaddr,driverno,driver,trandate,unit,price,price2,price3,memo
+					,custno,comp,nick)
+				select @isexist,@accy,@noa,@carteamno,@calctype,@datea
+					,@po,@straddrno,@straddr,@sender,@addressee,@atel,@endaddrno,@endaddr
+					,@inmount,@pton,@aaddr,@driverno,@driver,@trandate,@unit,@price,@price2,@price3,@memo
+					,@custno,@comp,@nick
+		end
+		--end try
+		--begin catch 
+		--	--nothing
+		--end catch
+
+		fetch next from cursor_table
+		into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t
+	end
+	close cursor_table
+	deallocate cursor_table
+--------------------------------------------------------------------------------------------------
+	declare cursor_table cursor for
+	select accy from #z_hctp group by accy 
+	open cursor_table
+	fetch next from cursor_table
+	into @accy
+	while(@@FETCH_STATUS <> -1)
+	begin
+		--begin try	
+			set @cmd = "insert into transef"+@accy+"(noa,noq,carteamno,calctype,datea,timea
+					,po,straddrno,straddr,sender,addressee,atel,endaddrno,endaddr
+					,inmount,pton,aaddr,driverno,driver,trandate,unit,price,price2,price3,memo
+					,worker,custno,comp,nick)
+			select noa,'001',carteamno,calctype,datea,@curdate
+					,po,straddrno,straddr,sender,addressee,atel,endaddrno,endaddr
+					,inmount,pton,aaddr,driverno,driver,trandate,unit,price,price2,price3,memo
+					,@worker,custno,comp,nick
+			from #z_hctp where accy=@accy and isexist=0"
+			execute sp_executesql @cmd,N'@accy nvarchar(10),@curdate nvarchar(max),@worker nvarchar(max)'
+				,@accy=@accy,@curdate=@curdate,@worker=@worker
+			
+			set @cmd=
+			"update transef"+@accy+" set calctype=b.calctype,datea=b.datea,timea=@curdate,po=b.po,straddrno=b.straddrno
+				,straddr=b.straddr,sender=b.sender,addressee=b.addressee,atel=b.atel,endaddrno=b.endaddrno
+				,endaddr=b.endaddr,inmount=b.inmount,pton=b.pton,aaddr=b.aaddr,driverno=b.driverno
+				,driver=b.driver,trandate=b.trandate,unit=b.unit,price=b.price,price2=b.price2
+				,price3=b.price3,memo=b.memo,worker2=@worker
+				,custno=b.custno,comp=b.comp,nick=b.nick
+			from transef"+@accy+" a
+			left join #z_hctp b on a.noa=b.noa
+			where b.accy=@accy and b.isexist=1"
+			execute sp_executesql @cmd,N'@accy nvarchar(10),@curdate nvarchar(max),@worker nvarchar(max)'
+				,@accy=@accy,@curdate=@curdate,@worker=@worker
+		--end try
+		--begin catch 
+		--	--nothing
+		--end catch
+
+		fetch next from cursor_table
+		into @accy
+	end
+	close cursor_table
+	deallocate cursor_table
+	drop table #z_hctp;

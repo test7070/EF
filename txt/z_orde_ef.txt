@@ -1,0 +1,284 @@
+z_orde_ef02:--z_orde_ef02	
+	declare @t_bdate nvarchar(20) = case when '#non'=[1] then '' else [1] end
+	declare @t_edate nvarchar(20) = case when '#non'=[2] then '9999/12/31' else [2] end
+	-----------------------------------------------------------
+	declare @bdate date = dbo.ChineseEraName2AD(@t_bdate)
+	declare @edate date = dbo.ChineseEraName2AD(@t_edate)
+	-------------------------------------------------------------------------------------------------
+	--保留最新的資料，其他刪除
+	delete ztmp_ef
+	from ztmp_ef a
+	outer apply(select MAX(sdate) sdate from ztmp_ef where SEQ_NO=a.SEQ_NO) b
+	where a.sdate != b.sdate
+
+	delete ztmp_efs
+	from ztmp_efs a
+	outer apply(select MAX(sdate) sdate from ztmp_efs where SEQ_NO=a.SEQ_NO and SEQ=a.SEQ) b
+	where a.sdate != b.sdate
+	--------------------------------------------------------------------------------------------------
+	declare @tmpa table(
+		sdate datetime,
+		SEQ_NO	int,				--系統序號（由0開始，最大值+1填入）
+		ORDER_TYPE	nvarchar(10),	--訂單類別（1：進口）
+		TD_NO nvarchar(30),			--進口單號
+		CONTAINER_COUNT	 nvarchar(50),--貨櫃數量（40*2+40H*1）
+		ORDER_DATE datetime,	--訂單日期
+		SHIP_COMPANY nvarchar(50),			--船公司
+		SHIP_NAME nvarchar(50),				--船名
+		SHIP_NUMBER	nvarchar(50),		--航次
+		CONTAINER_SOURCE nvarchar(50),--		領櫃地
+		GET_DEADLINE datetime,--領櫃期限
+		NOTE nvarchar(max),	--備註
+		IS_READ	nvarchar(10),	--已讀取（我方填入）
+		IS_DEL	nvarchar(10)	--若上傳的資料有錯就填入1，再上傳新的進口資料
+
+	)
+	insert into @tmpa(sdate,SEQ_NO
+		,ORDER_TYPE,TD_NO,CONTAINER_COUNT,ORDER_DATE
+		,SHIP_COMPANY,SHIP_NAME,SHIP_NUMBER,CONTAINER_SOURCE,GET_DEADLINE
+		,NOTE,IS_READ,IS_DEL)
+	select sdate,SEQ_NO
+		,ORDER_TYPE,TD_NO,CONTAINER_COUNT,ORDER_DATE
+		,SHIP_COMPANY,SHIP_NAME,SHIP_NUMBER,CONTAINER_SOURCE,GET_DEADLINE
+		,NOTE,IS_READ,IS_DEL
+	from ztmp_ef a 
+	outer apply (select max(sdate) zz from ztmp_ef where SEQ_NO=a.SEQ_NO ) b
+	where a.sdate=b.zz
+	and order_type = '1' --進口
+	and isnull(IS_DEL,'0') = 0
+	and (len(@t_bdate) = 0 or a.ORDER_DATE>=@bdate)
+	and (@t_edate='9999/12/31' or a.ORDER_DATE<=@edate) 
+	-------------------------------------------------------------------------------------------------
+	declare @tmpb table(
+		recno int,
+		sdate datetime,		
+		SEQ_NO	int,				--系統序號（與主檔一致）
+		TD_NO nvarchar(50),			--進口單號
+		SEQ	int,					--序號（以TD_NO為主，換個TD_NO序號會重編）
+		CONTAINER_TYPE nvarchar(50),--櫃型
+		CONTAINER_NO nvarchar(50),--貨櫃號碼
+		NEED_DATE nvarchar(50),--		需求日期（我方填入，叫櫃時才會輸入）
+		NEED_TIME nvarchar(50),--		需求時間（我方填入，叫櫃時才會輸入）
+		DESTINATION	nvarchar(50),--		送櫃地點（我方填入，叫櫃時才會輸入）
+		CTN_ETA	nvarchar(50),--		預計到達時間（只需填入時間”00:00”）
+		NOTE nvarchar(max)	--		備註
+
+	)
+	insert into @tmpb(recno,sdate,SEQ_NO,TD_NO,SEQ,CONTAINER_TYPE,
+		CONTAINER_NO,NEED_DATE,NEED_TIME,DESTINATION,CTN_ETA,NOTE)
+	select ROW_NUMBER()over(partition by b.SEQ_NO order by a.SEQ)
+		, a.sdate,a.SEQ_NO,a.TD_NO,a.SEQ,a.CONTAINER_TYPE,
+		a.CONTAINER_NO,a.NEED_DATE,a.NEED_TIME,a.DESTINATION,a.CTN_ETA,a.NOTE
+	from  ztmp_efs a
+	left join @tmpa b on a.sdate=b.sdate and a.SEQ_NO=b.SEQ_NO
+	where b.SEQ_NO is not null
+	
+	--******************更新資料****************************************************************
+	update ztmp_efimport set is_read = 1
+	from ztmp_efimport a
+	left join @tmpa b on a.seq_no=b.SEQ_NO and a.td_no=b.TD_NO
+	where isnull(b.SEQ_NO,0)>0 and b.is_read=1
+	-------------------------------------------------------------------------------------------------
+	declare @tmpc table(
+		sdate datetime,
+		SEQ_NO	int,				--系統序號（由0開始，最大值+1填入）
+		ORDER_TYPE	nvarchar(10),	--訂單類別（1：進口）
+		TD_NO nvarchar(30),			--進口單號
+		CONTAINER_COUNT	 nvarchar(50),--貨櫃數量（40*2+40H*1）
+		ORDER_DATE datetime,	--訂單日期
+		SHIP_COMPANY nvarchar(50),			--船公司
+		SHIP_NAME nvarchar(50),				--船名
+		SHIP_NUMBER	nvarchar(50),		--航次
+		CONTAINER_SOURCE nvarchar(50),--		領櫃地
+		GET_DEADLINE datetime,--領櫃期限
+		NOTE nvarchar(max),	--備註
+		IS_READ	nvarchar(10),	--已讀取（我方填入）
+		IS_DEL	nvarchar(10),	--若上傳的資料有錯就填入1，再上傳新的進口資料
+		
+		pno int,
+		TD_NO_S nvarchar(50),			--進口單號
+		SEQ_S	int,					--序號（以TD_NO為主，換個TD_NO序號會重編）
+		CONTAINER_TYPE_S nvarchar(50),--櫃型
+		CONTAINER_NO_S nvarchar(50),--貨櫃號碼
+		NEED_DATE_S nvarchar(50),--		需求日期（我方填入，叫櫃時才會輸入）
+		NEED_TIME_S nvarchar(50),--		需求時間（我方填入，叫櫃時才會輸入）
+		DESTINATION_S	nvarchar(50),--		送櫃地點（我方填入，叫櫃時才會輸入）
+		CTN_ETA_S	nvarchar(50),--		預計到達時間（只需填入時間”00:00”）
+		NOTE_S nvarchar(max)	--		備註
+	)
+	
+	insert into @tmpc
+	select a.sdate,a.SEQ_NO
+		,a.ORDER_TYPE,a.TD_NO,a.CONTAINER_COUNT,a.ORDER_DATE
+		,a.SHIP_COMPANY,a.SHIP_NAME,a.SHIP_NUMBER,a.CONTAINER_SOURCE,a.GET_DEADLINE
+		,a.NOTE,a.IS_READ,a.IS_DEL
+		,b.recno,b.TD_NO,b.SEQ,b.CONTAINER_TYPE
+		,b.CONTAINER_NO,b.NEED_DATE,b.NEED_TIME,b.DESTINATION,b.CTN_ETA,b.NOTE
+	from @tmpa a
+	left join @tmpb b on a.sdate=b.sdate and a.SEQ_NO=b.SEQ_NO
+	-------------------------------------------------------------------------------
+	select ROW_NUMBER()over(order by order_date,td_no) rr
+		,case when isnull(pno,1)=1 then '1' else '2' end gno
+		,TD_NO a01
+		,CONTAINER_COUNT a02
+		,dbo.AD2ChineseEraName(ORDER_DATE) a03
+		,SHIP_COMPANY a04
+		,SHIP_NAME a05
+		,SHIP_NUMBER a06
+		,CONTAINER_SOURCE a07
+		,GET_DEADLINE a08
+		,NOTE a09
+		
+		,CONTAINER_TYPE_S b01
+		,CONTAINER_NO_S b02
+		,NEED_DATE_S b03
+		,NEED_TIME_S b04
+		,DESTINATION_S	b05
+		,CTN_ETA_S	b06
+		,NOTE_S b07
+	from @tmpc
+	order by order_date,td_no;
+
+
+z_orde_ef01:--z_orde_ef01	
+	declare @t_bdate nvarchar(20) = case when '#non'=[1] then '' else [1] end
+	declare @t_edate nvarchar(20) = case when '#non'=[2] then '9999/12/31' else [2] end
+	-----------------------------------------------------------
+	declare @bdate date = dbo.ChineseEraName2AD(@t_bdate)
+	declare @edate date = dbo.ChineseEraName2AD(@t_edate)
+	-------------------------------------------------------------------------------------------------
+	--保留最新的資料，其他刪除
+	delete ztmp_ef
+	from ztmp_ef a
+	outer apply(select MAX(sdate) sdate from ztmp_ef where SEQ_NO=a.SEQ_NO) b
+	where a.sdate != b.sdate
+
+	delete ztmp_efs
+	from ztmp_efs a
+	outer apply(select MAX(sdate) sdate from ztmp_efs where SEQ_NO=a.SEQ_NO and SEQ=a.SEQ) b
+	where a.sdate != b.sdate
+	--------------------------------------------------------------------------------------------------
+	declare @tmpa table(
+		sdate datetime,
+		SEQ_NO	int,				--系統序號（由0開始，最大值+1填入）
+		ORDER_TYPE	nvarchar(10),			--訂單類別（2：出口）
+		TD_NO nvarchar(30),					--訂單編號（我方的訂單編號）
+		ORDER_DATE	datetime,			--訂單日期
+		SHIP_COMPANY nvarchar(50),			--船公司
+		SHIP_NAME nvarchar(50),				--船名
+		SHIP_NUMBER	nvarchar(50),		--航次
+		CONTAINER_SOURCE nvarchar(50),		--領櫃地
+		CONTAINER_DELIVER nvarchar(50),		--交櫃地
+		SO_NO nvarchar(50),					--S/O
+		CUSTOMER_CLEAR_DATE nvarchar(50),	--結關日
+		PORT_TO nvarchar(50),					--卸貨港
+		CONT_SRC_NO	nvarchar(50),		--領櫃代號
+		DESTINATION	nvarchar(50),		--送櫃地點
+		NOTE nvarchar(max)				--備註
+	)
+	insert into @tmpa(sdate,SEQ_NO,ORDER_TYPE,TD_NO,ORDER_DATE,SHIP_COMPANY,SHIP_NAME,SHIP_NUMBER
+		,CONTAINER_SOURCE,CONTAINER_DELIVER,SO_NO,CUSTOMER_CLEAR_DATE,PORT_TO
+		,CONT_SRC_NO,DESTINATION,NOTE)
+	select sdate,SEQ_NO,ORDER_TYPE,TD_NO,ORDER_DATE,SHIP_COMPANY,SHIP_NAME,SHIP_NUMBER
+		,CONTAINER_SOURCE,CONTAINER_DELIVER,SO_NO,CUSTOMER_CLEAR_DATE,PORT_TO
+		,CONT_SRC_NO,DESTINATION,NOTE 
+	from ztmp_ef a 
+	outer apply (select max(sdate) zz from ztmp_ef where SEQ_NO=a.SEQ_NO ) b
+	where a.sdate=b.zz
+	and order_type = '2' --出口
+	and (len(@t_bdate) = 0 or a.ORDER_DATE>=@bdate)
+	and (@t_edate='9999/12/31' or a.ORDER_DATE<=@edate) 
+	-------------------------------------------------------------------------------------------------
+	declare @tmpb table(
+		recno int,
+		sdate datetime,
+		SEQ_NO	int,				--系統序號（與主檔一致）
+		TD_NO nvarchar(50),					--訂單編號（我方的訂單編號）
+		SEQ	int,					--序號（以TD_NO為主，換個TD_NO序號會重編）
+		CONTAINER_TYPE nvarchar(50),		--櫃型
+		NEED_DATE nvarchar(50),				--需求日期
+		NEED_TIME nvarchar(50),				--需求時間
+		DESTINATION	nvarchar(50), 		--目的地
+		FBC	nvarchar(50),					--前後櫃（雙拖用。1：前櫃；2：後櫃）
+		GROUPNO	nvarchar(50),			--雙拖分組碼（雙拖用。前後櫃會填入一相同的代碼）
+		CTN_ETA	nvarchar(50),				--預計到達時間（貴方輸入，只需填入時間”00:00”）
+		NOTE nvarchar(max)					--備註
+	)
+	insert into @tmpb(recno,sdate,SEQ_NO,TD_NO,SEQ,CONTAINER_TYPE,NEED_DATE,NEED_TIME
+		,DESTINATION,FBC,GROUPNO,CTN_ETA,NOTE)
+	select ROW_NUMBER()over(partition by b.SEQ_NO order by a.SEQ)
+		, a.sdate,a.SEQ_NO,a.TD_NO,a.SEQ,a.CONTAINER_TYPE,a.NEED_DATE,a.NEED_TIME
+		,a.DESTINATION,a.FBC,a.GROUPNO,a.CTN_ETA,a.NOTE 
+	from  ztmp_efs a
+	left join @tmpa b on a.sdate=b.sdate and a.SEQ_NO=b.SEQ_NO
+	where b.SEQ_NO is not null
+	-------------------------------------------------------------------------------------------------
+	declare @tmpc table(
+		sdate datetime,
+		SEQ_NO	int,				--系統序號（由0開始，最大值+1填入）
+		ORDER_TYPE	nvarchar(10),			--訂單類別（2：出口）
+		TD_NO nvarchar(30),					--訂單編號（我方的訂單編號）
+		ORDER_DATE	datetime,			--訂單日期
+		SHIP_COMPANY nvarchar(50),			--船公司
+		SHIP_NAME nvarchar(50),				--船名
+		SHIP_NUMBER	nvarchar(50),		--航次
+		CONTAINER_SOURCE nvarchar(50),		--領櫃地
+		CONTAINER_DELIVER nvarchar(50),		--交櫃地
+		SO_NO nvarchar(50),					--S/O
+		CUSTOMER_CLEAR_DATE nvarchar(50),	--結關日
+		PORT_TO nvarchar(50),					--卸貨港
+		CONT_SRC_NO	nvarchar(50),		--領櫃代號
+		DESTINATION	nvarchar(50),		--送櫃地點
+		NOTE nvarchar(max),				--備註
+		
+		pno int,
+		TD_NO_S nvarchar(50),					--訂單編號（我方的訂單編號）
+		SEQ_S	int,					--序號（以TD_NO為主，換個TD_NO序號會重編）
+		CONTAINER_TYPE_S nvarchar(50),		--櫃型
+		NEED_DATE_S nvarchar(50),				--需求日期
+		NEED_TIME_S nvarchar(50),				--需求時間
+		DESTINATION_S	nvarchar(50), 		--目的地
+		FBC_S	nvarchar(50),					--前後櫃（雙拖用。1：前櫃；2：後櫃）
+		GROUPNO_S	nvarchar(50),			--雙拖分組碼（雙拖用。前後櫃會填入一相同的代碼）
+		CTN_ETA_S	nvarchar(50),				--預計到達時間（貴方輸入，只需填入時間”00:00”）
+		NOTE_S nvarchar(max)					--備註
+	)
+	
+	insert into @tmpc
+	select a.sdate,a.SEQ_NO,a.ORDER_TYPE,a.TD_NO,a.ORDER_DATE,a.SHIP_COMPANY,a.SHIP_NAME,a.SHIP_NUMBER
+		,a.CONTAINER_SOURCE,a.CONTAINER_DELIVER,a.SO_NO,a.CUSTOMER_CLEAR_DATE,a.PORT_TO
+		,a.CONT_SRC_NO,a.DESTINATION,a.NOTE
+		,b.recno,b.TD_NO,b.SEQ,b.CONTAINER_TYPE,b.NEED_DATE,b.NEED_TIME
+		,b.DESTINATION,b.FBC,b.GROUPNO,b.CTN_ETA,b.NOTE
+	from @tmpa a
+	left join @tmpb b on a.sdate=b.sdate and a.SEQ_NO=b.SEQ_NO
+	-------------------------------------------------------------------------------
+	--訂單編號	訂單日期	船公司	船名	航次	領櫃地	交櫃地	S/O	結關日	卸貨港	領櫃代號	送櫃地點	備註	
+	--櫃型	需求日期	需求時間	目的地	前後櫃	雙拖分組碼	預計到達時間
+
+
+	select ROW_NUMBER()over(order by order_date,td_no) rr
+		,case when isnull(pno,1)=1 then '1' else '2' end gno
+		,TD_NO a01
+		,dbo.AD2ChineseEraName(ORDER_DATE) a02
+		,SHIP_COMPANY a03
+		,SHIP_NAME a04
+		,SHIP_NUMBER a05
+		,CONTAINER_SOURCE a06
+		,CONTAINER_DELIVER a07
+		,SO_NO a08
+		,CUSTOMER_CLEAR_DATE a09
+		,PORT_TO a10
+		,CONT_SRC_NO a11
+		,DESTINATION a12
+		,NOTE a13
+		
+		,CONTAINER_TYPE_S b01
+		,NEED_DATE_S b02
+		,NEED_TIME_S b03
+		,DESTINATION_S b04
+		,FBC_S b05
+		,GROUPNO_S b06
+		,CTN_ETA_S b07
+	from @tmpc
+	order by order_date,td_no;

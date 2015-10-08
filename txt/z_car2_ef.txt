@@ -1,0 +1,30 @@
+z_car2_ef01:--z_car2_ef01
+	SET QUOTED_IDENTIFIER OFF
+	declare @t_bdate nvarchar(20) = case when '#non'=[1] then '' else [1] end
+	declare @t_edate nvarchar(20) = case when '#non'=[2] then char(255) else [2] end
+	declare @t_carno nvarchar(20) = case when '#non'=[3] then '' else [3] end
+	--------------------------------------------------------------------------------------------------------
+	declare @tmp table(
+		recno int,
+		carno nvarchar(20),
+		date1 nvarchar(20),--驗車日期
+		date2 nvarchar(20) --保單到期日
+	)
+	insert into @tmp(carno,date1,date2)
+	select a.carno,a.ndate,b.edate
+	from car2 a
+	outer apply (select top 1 edate from carInsure where noa=a.carno order by edate desc) b
+	where (len(@t_carno)=0 or CHARINDEX(a.carno,','+@t_carno+',')>0)
+	and (isnull(a.ndate,'') between @t_bdate and @t_edate 
+		or isnull(b.edate,'') between @t_bdate and @t_edate)
+	
+	update @tmp set recno=b.recno
+	from @tmp a
+	left join (select row_number()over(order by carno) recno,carno from @tmp) b on a.carno=b.carno
+	
+	select '1' gno
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+cast(recno as nvarchar)+'</a>' rr
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+carno+'</a>' a01
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+date1+'</a>' a02
+		,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+date2+'</a>' a03
+	from @tmp;

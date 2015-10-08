@@ -1,0 +1,202 @@
+zxls_hctb:--zxls_hctb  峻富  B段	
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max)
+	declare @workerno nvarchar(max) = [1]
+	declare @worker nvarchar(max) = [2]
+	declare @t_filename nvarchar(max) = [3]
+	declare @t_timea nvarchar(max) = convert(nvarchar, getdate(),120) 
+	------------------------------------------------------------------------------------
+	declare @t_date nvarchar(max)
+	set @t_filename = REVERSE(replace(Upper(@t_filename),'HCTB',''))
+	set @t_filename = REVERSE(substring(@t_filename,charindex('.',@t_filename)+1,len(@t_filename)))
+	if ISDATE(cast(CAST(LEFT(@t_filename,3) as int)+1911 as nvarchar)+'/'+SUBSTRING(@t_filename,4,2)+'/'+SUBSTRING(@t_filename,6,2)) = 0
+	begin
+		print '日期異常'
+		return
+	end	
+	set @t_date = LEFT(@t_filename,3)+'/'+SUBSTRING(@t_filename,4,2)+'/'+SUBSTRING(@t_filename,6,2)
+	------------------------------------------------------------------------------------
+	IF OBJECT_ID('tempdb..#z_hctb')is not null
+	BEGIN
+		drop table #z_hctb
+	END
+	create table #z_hctb(
+		accy nvarchar(20),
+		noa nvarchar(20),
+		straddrno nvarchar(20),
+		straddr nvarchar(50),
+		endaddrno nvarchar(20),
+		endaddr nvarchar(50),
+		memo nvarchar(max),
+		tggno nvarchar(20),
+		tgg nvarchar(40),
+		carno nvarchar(20),
+		calctype nvarchar(20),
+		carteamno nvarchar(20),
+		driverno nvarchar(20),
+		driver nvarchar(40),
+		mount1 float,
+		mount2 float,
+		price2 float,
+		price3 float,
+		timea datetime,
+		miles float,
+		casecust nvarchar(20)
+	)
+	declare @a nvarchar(max)
+	declare @b nvarchar(max)
+	declare @c nvarchar(max)
+	declare @d nvarchar(max)
+	declare @e nvarchar(max)
+	declare @f nvarchar(max)
+	declare @g nvarchar(max)
+	declare @h nvarchar(max)
+	declare @i nvarchar(max)
+	declare @j nvarchar(max)
+	declare @k nvarchar(max)
+	declare @l nvarchar(max)
+	
+	declare @straddrno nvarchar(20)
+	declare @straddr nvarchar(40)
+	declare @endaddrno nvarchar(20)
+	declare @endaddr nvarchar(40)
+	
+	declare @tggno nvarchar(20)
+	declare @tgg nvarchar(40)
+	declare @carno nvarchar(20)
+	declare @driverno nvarchar(20)
+	declare @driver nvarchar(30)
+	declare @mount1 float
+	declare @mount2 float
+	declare @money float
+	declare @price2 float
+	declare @price3 float
+	declare @memo nvarchar(max)
+	declare @calctype nvarchar(20)
+	declare @carteamno nvarchar(20)
+	declare @miles float
+	declare @casecust nvarchar(20)
+	
+	declare @string nvarchar(max) = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	declare @accy nvarchar(10) = ''
+	declare @noa nvarchar(20) = ''
+	declare @no1 nvarchar(20),@no2 nvarchar(20)
+	declare @number nvarchar(max)
+	declare @nn int
+	declare @mm nvarchar(max)
+	
+	declare cursor_table cursor for
+	select a,b,c,d,e,f,g,h,i,j,k,l from ztmpxls order by cast(noa as int)
+	open cursor_table
+	fetch next from cursor_table
+	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l
+	while(@@FETCH_STATUS <> -1)
+	begin
+		begin try		
+			select @straddrno='',@straddr=@b
+			select top 1 @straddrno=noa from addr2 where @straddr=addr
+			select @endaddrno='',@endaddr=@c
+			select top 1 @endaddrno=noa from addr2 where @endaddr=addr
+			select @tggno='', @tgg=@e
+			select top 1 @tggno=noa from tgg where charindex(@e,comp)>0
+			set @carno = @f
+			select @driverno='', @driver = @h
+			select top 1 @driverno=noa from driver where namea=@driver
+			set @mount1 = CAST(@i as int)
+			set @mount2 = CAST(@j as int)
+			set @miles = CAST(replace(@k,',','') as float)
+			set @money = CAST(replace(@l,',','') as int)
+			set @casecust = @d
+			set @memo = @t_filename + '-'+@a
+			
+			select @calctype='B01'--外車
+			select top 1 @calctype=case when cartype='2' then 'A01' else 'B01' end from car2 where carno=@carno
+			if @mount1>0 or @mount2>0 or @money>0
+			begin
+				select @accy='',@noa = ''
+				select @accy=accy,@noa=noa from view_transef where memo=@memo 
+				if len(ISNULL(@noa,''))=0
+				begin
+					set @accy = LEFT(@t_date,3)
+					select @noa='',@no1='',@no2=''
+					select top 1 @no1 = noa from view_transef where noa like 'BA'+REPLACE(@t_date,'/','')+'[0-9,A-Z][0-9][0-9]' order by noa desc
+					select top 1 @no2 = noa from #z_hctb where noa like 'BA'+REPLACE(@t_date,'/','')+'[0-9,A-Z][0-9][0-9]' order by noa desc
+					select @noa = case when @no1>@no2 then @no1 else @no2 end
+					if LEN(ISNULL(@noa,'')) = 0
+						set @noa = 'BA'+REPLACE(@t_date,'/','')+'000'
+					set @number = right(@noa,3)
+					set @nn = (charindex(left(@number,1),@string)-1) * 100 + cast(right(@number,2) as int) 
+					set @nn = @nn + 1
+					set @mm = substring(@string,floor(@nn/100)+1,1)
+					set @noa =  'BA'+REPLACE(@t_date,'/','')+@mm+RIGHT('00'+cast(@nn as nvarchar),2)
+				end
+				if @calctype='B01'
+				begin
+					select @price2=0,@price3=@money
+				end
+				else
+				begin
+					select @price2=@money,@price3=0
+				end
+		
+				insert into #z_hctb(accy,noa,straddrno,straddr,endaddrno,endaddr,tggno,tgg,carno,calctype,driverno,driver,mount1,mount2,price2,price3,memo,timea,miles,casecust)
+				select @accy,@noa,@straddrno,@straddr,@endaddrno,@endaddr,@tggno,@tgg,@carno,@calctype,@driverno,@driver,@mount1,@mount2,@price2,@price3,@memo,@t_timea,@miles,@casecust
+			end
+		end try
+		begin catch 
+			--nothing
+		end catch
+		fetch next from cursor_table
+		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l
+	end
+	close cursor_table
+	deallocate cursor_table
+	----------------------------------------------------------------------------------------------
+	select @carteamno = '10' -- B段
+
+	declare cursor_table cursor for
+	select accy from #z_hctb group by accy
+	open cursor_table
+	fetch next from cursor_table
+	into @accy
+	while(@@FETCH_STATUS <> -1)
+	begin
+		set @cmd=
+		"update transef"+@accy+" set
+		straddrno=b.straddrno
+		,straddr=b.straddr
+		,endaddrno=b.endaddrno
+		,endaddr=b.endaddr
+		,carteamno=b.carteamno
+		,calctype=b.calctype
+		,tggno=b.tggno,tgg=b.tgg
+		,carno=b.carno,driverno=b.driverno,driver=b.driver
+		,inmount=b.mount1,pton=b.mount2,price2=b.price2,price3=b.price3,miles=b.miles
+		,memo=b.memo,timea=b.timea,worker=@worker,casecust=b.casecust
+		from transef"+@accy+" a
+		left join #z_hctb b on b.accy=@accy and a.noa=b.noa
+		where b.noa is not null"
+		execute sp_executesql @cmd,N'@accy nvarchar(20),@worker nvarchar(20)'
+		,@accy=@accy,@worker=@worker
+		
+		set @cmd=
+		"insert into transef"+@accy+"(noa,noq,datea,trandate,straddrno,straddr,endaddrno,endaddr
+		,carteamno,calctype
+		,tggno,tgg,carno,driverno,driver,inmount,pton,price2,price3,miles
+		,memo,timea,worker,casecust)
+		select noa,'001',@t_date,@t_date,straddrno,straddr,endaddrno,endaddr
+		,@carteamno,calctype
+		,tggno,tgg,carno,driverno,driver,mount1,mount2,price2,price3,miles
+		,memo,@t_timea,@worker,casecust
+		from #z_hctb a
+		where a.accy=@accy 
+		and not exists(select top 1 * from transef"+@accy+" where noa=a.noa)"
+		execute sp_executesql @cmd,N'@t_date nvarchar(20),@t_timea nvarchar(max),@carteamno nvarchar(20),@accy nvarchar(20),@worker nvarchar(20)'
+		,@t_date=@t_date,@t_timea=@t_timea,@carteamno=@carteamno,@accy=@accy,@worker=@worker
+		
+		fetch next from cursor_table
+		into @accy
+	end
+	close cursor_table
+	deallocate cursor_table
+	drop table #z_hctb;

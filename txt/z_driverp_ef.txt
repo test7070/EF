@@ -1,0 +1,47 @@
+z_driverp_ef01:--z_driverp_ef01
+	SET QUOTED_IDENTIFIER OFF
+	declare @t_bdriverno nvarchar(20) = case when '#non'=[1] then '' else [1] end
+	declare @t_edriverno nvarchar(20) = case when '#non'=[2] then char(255) else [2] end
+	declare @t_bcardealno nvarchar(20) = case when '#non'=[3] then '' else [3] end
+	declare @t_ecardealno nvarchar(20) = case when '#non'=[4] then char(255) else [4] end
+	declare @t_cartype nvarchar(max) = case when '#non'=[5] then '' else [5] end
+	declare @t_mode nvarchar(max) = case when '#non'=[6] then '' else [6] end
+	declare @t_isexist nvarchar(max) = case when '#non'=[7] then '' else [7] end
+	----------------------------------------------------------------------
+	declare @tmp table(
+		gno nvarchar(20),
+		recno int,
+		noa nvarchar(20),
+		namea nvarchar(20),
+		tel nvarchar(50),
+		mobile nvarchar(50),
+		
+		cardealno nvarchar(20),
+		cardeal nvarchar(50),
+		cartype nvarchar(20),
+		mode nvarchar(max)
+	)
+	insert into @tmp(gno,recno,noa,namea,tel,mobile,cardealno,cardeal,cartype,mode)
+	select '1',ROW_NUMBER()over(order by a.noa)
+		,a.noa,a.namea,a.tel,a.mobile,a.cardealno,b.comp,a.cartype,a.guild 
+	from driver a
+	left join cardeal b on a.cardealno=b.noa
+	where a.noa between @t_bdriverno and @t_edriverno       
+	and ISNULL(a.cardealno,'') between @t_bcardealno and @t_ecardealno
+	and (len(@t_cartype)=0 or charindex(a.cartype,@t_cartype)>0)
+	and (len(@t_mode)=0 or charindex(a.guild,@t_mode)>0)            
+	and (len(@t_isexist)=0 
+		or (@t_isexist='Y' and len(isnull(a.leaveofficedate,''))=0) 
+		or (@t_isexist='N' and len(isnull(a.leaveofficedate,''))>0))  
+ 	
+	select recno rr
+		,"driver_ef?noa=\'"+noa+"\' and "+cast(recno as nvarchar)+"=$rr?" ghref
+		,noa a01
+		,namea a02
+		,tel a03
+		,mobile a04
+		,cardeal a05
+		,cartype a06
+		,mode a07
+		,* 
+	from @tmp order by recno;
