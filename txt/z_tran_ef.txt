@@ -996,6 +996,7 @@ z_tran_ef09:--z_tran_ef09
 		EXECUTE sp_executesql @cmd
 	END
 	create table #z_tran03(
+		
 		gno nvarchar(3),
 		trandate nvarchar(10),
 		datea nvarchar(10),
@@ -1026,6 +1027,7 @@ z_tran_ef09:--z_tran_ef09
 		caseno nvarchar(30),
 		cc  nvarchar(20),
 		tt  nvarchar(20),
+		accy nvarchar(10),
 		noa  nvarchar(20),
 		carcount int,
 		ordeno nvarchar(max),
@@ -1042,12 +1044,12 @@ z_tran_ef09:--z_tran_ef09
 		driver nvarchar(40)
 	)
 	insert into #z_tran03
-	select '0',a.trandate,a.datea,a.custno,left(a.comp,4),a.driverno,a.driver,a.carno
+	select '1',a.trandate,a.datea,a.custno,left(a.comp,4),a.driverno,a.driver,a.carno
 		,a.straddrno,a.straddr
 		,a.endaddrno,a.endaddr
 		,a.product,
 		 a.inmount,a.pton,a.mount,a.price,a.total,a.outmount,a.pton2,a.mount2,a.price2,a.price3,a.discount,a.total2,round((price2+price3)*mount2,0)
-		,a.po,a.caseno,e.typea,d.team,a.noa,0,a.ordeno
+		,a.po,a.caseno,e.typea,d.team,a.accy,a.noa,0,a.ordeno
 		,sender,stel,saddr,addressee,atel,aaddr,a.tggno,f.nick,a.unit,a.miles,a.driver
 		 from  view_transef a
 		 left join #carteam  b on a.carteamno=b.noa
@@ -1055,15 +1057,15 @@ z_tran_ef09:--z_tran_ef09
 		 left join carteam  d on a.carteamno=d.noa
 		 left join calctypes e on a.calctype=e.noa+e.noq
 		 left join tgg f on a.tggno=f.noa
-		 where a.carteamno = '02' and
-		 (a.datea  between  @t_bdate  and  @t_edate) and 
-		 (a.trandate  between  @t_btrandate  and  @t_etrandate) and 
-		 (isnull(a.custno,'')  between  @t_bcustno   and  @t_ecustno) and 
-		 (isnull(a.driverno,'')  between  @t_bdriverno   and  @t_edriverno) and 
-		 (len(@t_carno)=0  or  a.carno=@t_carno) and 
-		 (len(@t_po)=0  or  a.po=@t_po) and 
-		 (len(@t_baddr)=0  or  charindex(@t_baddr,a.straddr)>0) and
-		 (len(@t_eaddr)=0  or  charindex(@t_eaddr,a.endaddr)>0)
+		 where a.carteamno = '02' 
+		 and (a.datea  between  @t_bdate  and  @t_edate) 
+		 and (a.trandate  between  @t_btrandate  and  @t_etrandate) 
+		 and (isnull(a.custno,'')  between  @t_bcustno   and  @t_ecustno) 
+		 and (isnull(a.driverno,'')  between  @t_bdriverno   and  @t_edriverno) 
+		 and (len(@t_carno)=0  or  a.carno=@t_carno) 
+		 and (len(@t_po)=0  or  a.po=@t_po) 
+		 and (len(@t_baddr)=0  or  charindex(@t_baddr,a.straddr)>0) 
+		 and (len(@t_eaddr)=0  or  charindex(@t_eaddr,a.endaddr)>0)
 		 and (cast(@t_rank as int)>=6 or isnull(a.worker,'')=@t_user)
 		-- and (b.noa  is  not  null) and (c.noa  is  not  null)
 		 order  by  a.trandate,a.noa
@@ -1071,6 +1073,7 @@ z_tran_ef09:--z_tran_ef09
 	select  *
 		,@t_user uu
 		,ROW_NUMBER()over(order by a.datea,a.noa) rr
+		,"transef?noa=\'"+a.noa+"\' and "+cast(ROW_NUMBER()over(order by a.datea,a.noa) as nvarchar)+"=$rr?"+a.accy ghref
 		,a.datea a01
 		,a.trandate a02
 		,a.custno a03
@@ -1099,7 +1102,7 @@ z_tran_ef09:--z_tran_ef09
 	drop table #z_tran03
 	drop table #carkind
 	drop table #calctype
-	drop table #carteam;		
+	drop table #carteam;			
 z_tran_ef01:--z_tran_ef01	
 	SET QUOTED_IDENTIFIER OFF
 	declare @cmd nvarchar(max)

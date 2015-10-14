@@ -80,6 +80,9 @@ zxls_hilifea:--zxls_hilifea  萊爾富 文流
 	declare @r nvarchar(max)
 	declare @s nvarchar(max)
 	declare @t nvarchar(max)
+	declare @u nvarchar(max)
+	declare @v nvarchar(max)
+	declare @w nvarchar(max)
 	
 	declare @carteamno nvarchar(10) = 14 --文流
 	declare @accy nvarchar(10)
@@ -126,10 +129,10 @@ zxls_hilifea:--zxls_hilifea  萊爾富 文流
 	declare @string nvarchar(max)='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 	
 	declare cursor_table cursor for
-	select a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t from ztmpxls order by CAST(noa as int)
+	select a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w from ztmpxls order by CAST(noa as int)
 	open cursor_table
 	fetch next from cursor_table
-	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t
+	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t,@u,@v,@w
 	while(@@FETCH_STATUS <> -1)
 	begin
 		begin try	
@@ -157,7 +160,10 @@ zxls_hilifea:--zxls_hilifea  萊爾富 文流
 				set @value9 = CAST(@r as float)
 				set @value10 = CAST(@s as float)
 				set @value11 = CAST(@t as float)
-
+				set @value12 = CAST(@t as float)
+				set @total = CAST(@v as float)
+				set @total2 = CAST(@w as float)
+				
 				select @cartype='外車',@mode='模組二'	
 				if LEN(@driverno)>0
 				begin
@@ -234,13 +240,14 @@ zxls_hilifea:--zxls_hilifea  萊爾富 文流
 					set @price2 = 0
 				end
 				
-				set @value12=0
+				/*set @value12=0
 				select @value12 = b.custprice from addr a
 				left join addrs b on a.noa=b.noa
-				where a.addr = '萊爾富特殊點' and b.custno=@custno
+				where a.addr = '萊爾富特殊點' and b.custno=@custno*/
 				
-				select @price = @value7+@value12,@total=@price
-					,@total2 = @price2 + @price3 
+				select @price = @value7+@value12
+					--,@total=@price
+					--,@total2 = @price2 + @price3 
 				
 				insert into #z_HiLifeA(accy,noa,noq,po,straddrno,straddr,driverno,driver
 					,datea,trandate,custno,cust,nick,casecust,casecustno,caseno,caseno2		
@@ -257,7 +264,7 @@ zxls_hilifea:--zxls_hilifea  萊爾富 文流
 		end catch
 
 		fetch next from cursor_table
-		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t
+		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t,@u,@v,@w
 	end
 	close cursor_table
 	deallocate cursor_table
@@ -332,14 +339,14 @@ zxls_hilifea:--zxls_hilifea  萊爾富 文流
 		"insert into transef"+@accy+"(noa,noq,po,straddrno,straddr,driverno,driver
 				,datea,trandate,custno,comp,nick,casecust,casecustno,caseno,caseno2		
 				,value7,value8,value9,value10,value11,value12,memo,carteamno
-				,price,price2,price3,total,total2)
+				,price,price2,price3,total,total2,qtime)
 		select noa,noq,po,straddrno,straddr,driverno,driver
 			,datea,trandate,custno,cust,nick,casecust,casecustno,caseno,caseno2		
 			,value7,value8,value9,value10,value11,value12,memo,carteamno
-			,price,price2,price3,total,total2
+			,price,price2,price3,total,total2,@curdate
 		from #z_HiLifeA
 		where accy=@accy"
-		execute sp_executesql @cmd,N'@accy nvarchar(10)',@accy=@accy
+		execute sp_executesql @cmd,N'@accy nvarchar(10),@curdate nvarchar(max)',@accy=@accy,@curdate=@curdate
 	
 		fetch next from cursor_table
 		into @accy
