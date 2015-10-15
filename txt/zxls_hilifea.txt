@@ -160,7 +160,7 @@ zxls_hilifea:--zxls_hilifea  萊爾富 文流
 				set @value9 = CAST(@r as float)
 				set @value10 = CAST(@s as float)
 				set @value11 = CAST(@t as float)
-				set @value12 = CAST(@t as float)
+				set @value12 = CAST(@u as float)
 				set @total = CAST(@v as float)
 				set @total2 = CAST(@w as float)
 				
