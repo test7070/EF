@@ -26,14 +26,10 @@
             function q_gfPost() {
                 $('#q_report').q_report({
                     fileName : 'z_car2_ef',
-                    options : [ {/*[1][2]驗車日期*/
+                    options : [ {/*[1][2]日期*/
                         type : '1',
                         name : 'xdate'
                     },{//[3]
-						type : '5',
-						name : 'xtype',
-						value : 'check@驗車日期,insure@保單到期日'.split(',')
-                    },{//[4]
                         type : '6',
                         name : 'xcarno'
                     }]
