@@ -1569,6 +1569,7 @@ z_tran_ef07:--z_tran_ef07
 	declare @t_edate nvarchar(20) = case when '#non'=[3] then char(255) else [3] end
 	declare @t_bdriverno nvarchar(20) = case when '#non'=[10] then '' else [10] end
 	declare @t_edriverno nvarchar(20) = case when '#non'=[11] then char(255) else [11] end
+	declare @t_carteamno nvarchar(max) = case when '#non'=[17] then '' else [17] end
 	-----------------------------------------------------------------
 	declare @t_pageline int=38
 	-----------------------------------------------------------------
@@ -1609,6 +1610,7 @@ z_tran_ef07:--z_tran_ef07
 	where driverno between @t_bdriverno and @t_edriverno
 	and datea between @t_bdate and @t_edate
 	and (cast(@t_rank as int)>=6)
+	and (len(@t_carteamno)=0 or CHARINDEX(','+carteamno+',',','+@t_carteamno+',')>0)
 	order by driverno,trandate
 	------------------------------------------------------------------------------------
 	declare @tmpb table(
@@ -1631,6 +1633,7 @@ z_tran_ef07:--z_tran_ef07
 	and driverno between @t_bdriverno and @t_edriverno
 	and datea between @t_bdate and @t_edate
 	and (cast(@t_rank as int)>=6)
+	and (len(@t_carteamno)=0 or CHARINDEX(','+carteamno+',',','+@t_carteamno+',')>0)
 	order by driverno,datea
 	-----------------------------------------------------------------------------
 	declare @driverno nvarchar(20)
@@ -1757,7 +1760,6 @@ z_tran_ef07:--z_tran_ef07
 	,dbo.getComma(totmiles,0) c2
 	,dbo.getComma(totmoney,0) c3
 	from @tmp order by driverno,pno,recno;
-	
 
 z_tran_ef08:--z_tran_ef08	
 	declare @t_rank nvarchar(20) = '[24]'
@@ -1766,6 +1768,7 @@ z_tran_ef08:--z_tran_ef08
 	declare @t_edate nvarchar(20) = case when '#non'=[3] then char(255) else [3] end
 	declare @t_bdriverno nvarchar(20) = case when '#non'=[10] then '' else [10] end
 	declare @t_edriverno nvarchar(20) = case when '#non'=[11] then char(255) else [11] end
+	declare @t_carteamno nvarchar(max) = case when '#non'=[17] then '' else [17] end
 	-----------------------------------------------------------------
 	declare @tmpa table(
 		driverno nvarchar(20),
@@ -1780,6 +1783,7 @@ z_tran_ef08:--z_tran_ef08
 	where a.driverno between @t_bdriverno and @t_edriverno
 	and a.datea between @t_bdate and @t_edate
 	and (cast(@t_rank as int)>=6)
+	and (len(@t_carteamno)=0 or CHARINDEX(','+a.carteamno+',',','+@t_carteamno+',')>0)
 	group by a.driverno,b.namea
 	------------------------------------------------------------------------------------
 	declare @tmpb table(
@@ -1796,6 +1800,7 @@ z_tran_ef08:--z_tran_ef08
 	and driverno between @t_bdriverno and @t_edriverno
 	and datea between @t_bdate and @t_edate
 	and (cast(@t_rank as int)>=6)
+	and (len(@t_carteamno)=0 or CHARINDEX(','+a.carteamno+',',','+@t_carteamno+',')>0)
 	group by a.driverno,b.namea
 	-----------------------------------------------------------------------------
 	declare @tmp table(
