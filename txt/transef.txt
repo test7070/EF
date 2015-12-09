@@ -1,11 +1,32 @@
+transef2trd:--transef2trd
+	SET QUOTED_IDENTIFIER OFF
+	declare @t_noa nvarchar(20)= N[1]
+	declare @t_custno nvarchar(20)= N[2]
+	declare @t_bdate nvarchar(20)= N[3]
+	declare @t_edate nvarchar(20)= N[4]
+	declare @t_btrandate nvarchar(20)= N[5]
+	declare @t_etrandate nvarchar(20)= N[6]
+	
+	set @t_edate = case when len(ISNULL(@t_edate,''))=0 then CHAR(255) else @t_edate end
+	set @t_etrandate = case when len(ISNULL(@t_etrandate,''))=0 then CHAR(255) else @t_etrandate end
+
+	select a.* 
+	from view_transef a
+	left join view_trds b on a.noa=b.tranno
+	where ISNULL(a.custno,'')=@t_custno
+	and ISNULL(a.datea,'') between @t_bdate and @t_edate
+	and ISNULL(a.trandate,'') between @t_btrandate and @t_etrandate
+	and (b.noa is null or @t_noa=b.noa)
+	and ISNULL(a.price,0)!=0;
+
 transef_copy:--transef_copy 
 	SET QUOTED_IDENTIFIER OFF
 	declare @cmd nvarchar(max)
-	declare @workerno nvarchar(20) = [1]
-	declare @worker nvarchar(20) = [2]
-	declare @t_noa nvarchar(20) = [3]
-	declare @t_bdate nvarchar(10) = [4]
-	declare @t_edate nvarchar(10) = [5]
+	declare @workerno nvarchar(20) = N[1]
+	declare @worker nvarchar(20) = N[2]
+	declare @t_noa nvarchar(20) = N[3]
+	declare @t_bdate nvarchar(10) = N[4]
+	declare @t_edate nvarchar(10) = N[5]
 	declare @t_weekday nvarchar(max) = [6] --日一二三四五六  => 1234567
 	-----------------------------------------------------------------------------
 	if not exists(select * from view_transef where noa=@t_noa)
