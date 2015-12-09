@@ -1492,34 +1492,41 @@ z_tran_ef06:--z_tran_ef06
 		cust nvarchar(50),
 		nick nvarchar(20),
 		
-		total float
+		total float,
+		payed float
 	)
 	
-	insert into @tmpa(custno,cust,nick,total)
-	select a.custno,b.comp,b.nick,sum(isnull(a.total,0))
+	insert into @tmpa(custno,cust,nick,total,payed)
+	select a.custno,b.comp,b.nick,sum(isnull(a.total,0)),sum(isnull(c.total,0))
 	from view_transef a
 	left join cust b on a.custno=b.noa
+	left join view_trds c on a.noa=c.tranno
 	where a.custno between @t_bcustno and @t_ecustno
 	and a.datea between @t_bdate and @t_edate
 	and (cast(@t_rank as int)>=6 or isnull(b.worker,'')=@t_user)
 	group by a.custno,b.comp,b.nick
+
 	------------------------------------------------------------------------------------
 	declare @tmpb table(
 		custno nvarchar(20),
 		cust nvarchar(50),
 		nick nvarchar(20),
 		plus float,
-		minus float
+		minus float,
+		payed float
 	)
-	insert into @tmpb(custno,cust,nick,plus,minus)
+	insert into @tmpb(custno,cust,nick,plus,minus,payed)
 	select a.custno,b.comp,b.nick,sum(isnull(a.plusmoney,0)),sum(isnull(a.minusmoney,0))
+		,sum(isnull(a.plusmoney,0)-isnull(a.minusmoney,0))
 	from custchg a
 	left join cust b on a.custno=b.noa
+	outer apply(select noa from view_trd where CHARINDEX(a.noa,custchgno)> 0) c
 	where not(ISNULL(a.plusmoney,0)=0 and ISNULL(a.minusmoney,0)=0)
 	and a.custno between @t_bcustno and @t_ecustno
 	and a.datea between @t_bdate and @t_edate
 	and (cast(@t_rank as int)>=6 or isnull(b.worker,'')=@t_user)
 	group by a.custno,b.comp,b.nick
+
 	-----------------------------------------------------------------------------
 	declare @tmp table(
 		gno nvarchar(20),
@@ -1533,23 +1540,26 @@ z_tran_ef06:--z_tran_ef06
 		plus float,
 		minus float,
 		
-		totmoney float
+		totmoney float,
+		payed float,
+		unpay float
 	)
-	insert into @tmp(gno,pno,custno,cust,nick,total)
-	select '1','1',custno,cust,nick,total from @tmpa where total!=0 order by custno
+	insert into @tmp(gno,pno,custno,cust,nick,total,payed)
+	select '1','1',custno,cust,nick,total,payed from @tmpa where total!=0 order by custno
 	
-	update @tmp set plus=ISNULL(b.plus,0),minus=ISNULL(b.minus,0)
+	update @tmp set plus=ISNULL(b.plus,0),minus=ISNULL(b.minus,0),payed=ISNULL(a.payed,0)+ISNULL(b.payed,0)
 	from @tmp a
 	left join @tmpb b on a.custno=b.custno
 	
-	insert into @tmp(gno,pno,custno,cust,nick,plus,minus)
-	select '1','1',custno,cust,nick,plus,minus from @tmpb a 
+	insert into @tmp(gno,pno,custno,cust,nick,plus,minus,payed)
+	select '1','1',custno,cust,nick,plus,minus,payed from @tmpb a 
 	where not exists(select * from @tmp where custno=a.custno)
 	
-	insert into @tmp(gno,pno,total,plus,minus)
-	select '2','2',sum(isnull(total,0)),sum(isnull(plus,0)),sum(isnull(minus,0)) from @tmp
+	insert into @tmp(gno,pno,total,plus,minus,payed)
+	select '2','2',sum(isnull(total,0)),sum(isnull(plus,0)),sum(isnull(minus,0)),sum(isnull(payed,0)) from @tmp
 	
 	update @tmp set totmoney=ISNULL(total,0)+ISNULL(plus,0)-isnull(minus,0)
+	update @tmp set unpay = ISNULL(totmoney,0)-ISNULL(payed,0)
 	
 	select * 
 	,'應收帳款總表（'+@t_bdate+'～'+@t_edate+'）' titlea
@@ -1560,6 +1570,8 @@ z_tran_ef06:--z_tran_ef06
 	,dbo.getComma(plus,0) a5
 	,dbo.getComma(minus,0) a6
 	,dbo.getComma(totmoney,0) a7
+	,dbo.getComma(payed,0) a8
+	,dbo.getComma(unpay,0) a9
 	from @tmp order by pno,custno;
 	
 z_tran_ef07:--z_tran_ef07
