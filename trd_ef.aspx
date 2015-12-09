@@ -21,7 +21,7 @@
             q_tables = 's';
             var q_name = "trd";
             var q_readonly = ['txtTax', 'txtNoa', 'txtMoney', 'txtTotal', 'txtWorker2', 'txtWorker', 'txtStraddr', 'txtEndaddr',  'txtCustchgno', 'txtAccno', 'txtAccno2', 'txtYear2', 'txtYear1','txtPlusmoney','txtMinusmoney'];
-            var q_readonlys = ['txtTranno', 'txtTrannoq', 'txtTrandate', 'txtStraddr', 'txtEndaddr', 'txtProduct', 'txtCarno', 'txtCustorde', 'txtCaseno', 'txtMount','txtPrice', 'txtTotal', 'txtTranmoney','txtTranaccy'];
+            var q_readonlys = ['txtTranno', 'txtTrannoq', 'txtTrandate', 'txtStraddr', 'txtEndaddr', 'txtProduct', 'txtCarno', 'txtCustorde', 'txtCaseno', 'txtMount','txtPrice', 'txtTotal', 'txtTranmoney','txtTranaccy','txtOthercost'];
             var bbmNum = [['txtMoney', 10, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 10, 0, 1]];
             var bbsNum = [['txtTranmoney', 10, 0, 1], ['txtOverweightcost', 10, 0, 1], ['txtOthercost', 10, 0, 1], ['txtMount', 10, 3, 1], ['txtPrice', 10, 3, 1], ['txtTotal', 10, 0, 1]];
             var bbmMask = [];
@@ -40,7 +40,7 @@
             //, ['txtEndaddrno','','addr2','noa,addr','txtEndaddrno,txtEndaddr','addr2_b.aspx']
             , ['txtBoatno', 'lblBoat', 'boat', 'noa,boat', 'txtBoatno,txtBoat', 'boat_b.aspx']);
             $(document).ready(function() {
-                q_bbsShow = -1;
+               // q_bbsShow = -1;
                 bbmKey = ['noa'];
                 bbsKey = ['noa', 'noq'];
                 q_brwCount();
@@ -145,7 +145,7 @@
             		case 'qtxt.query.transef2trd':
             			var as = _q_appendData("tmp0", "", true, true);
                         if (as[0] != undefined) {
-                            q_gridAddRow(bbsHtm, 'tbbs', 'txtTranaccy,txtTranno,txtTrannoq,txtTrandate,txtStraddr,txtEndaddr,txtOthercost,txtPrice'
+                            q_gridAddRow(bbsHtm, 'tbbs', 'txtTranaccy,txtTranno,txtTrannoq,txtTrandate,txtStraddr,txtEndaddr,txtOthercost,txtTotal'
                         	, as.length, as, 'accy,noa,noq,datea,straddr,endaddr,miles,price', '','');
                         	sum();
                         } else {
@@ -367,7 +367,7 @@
                             q_box("transef.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";noa='" + $(this).val() + "';" + t_accy, 'trans', "95%", "95%", q_getMsg("popTrans"));
                             
                         });
-                        $('#txtPrice_'+j).change(function(e){
+                        $('#txtTotal_'+j).change(function(e){
                             sum();
                         });
                     }
@@ -415,7 +415,7 @@
                    // t_money = round(q_mul(q_float('txtMount_'+i),q_float('txtPrice_'+i)),0);
                     //$('#txtTotal_'+i).val(t_money);
                     //$('#txtTranmoney_'+i).val(t_money);
-                    t_money = q_float('txtPrice_'+i);
+                    t_money = q_float('txtTotal_'+i);
                     t_moneys += t_money;
                 }
                 t_plusmoney = q_float('txtPlusmoney');
@@ -822,7 +822,7 @@
                     <td><input type="text" id="txtStraddr.*" style="width:95%;" /> </td>
                     <td><input type="text" id="txtEndaddr.*" style="width:95%;" /> </td>
                     <td><input type="text" id="txtOthercost.*" style="width:95%;text-align: right;" /></td>
-                    <td><input type="text" id="txtPrice.*" style="width:95%;text-align: right;" /></td>
+                    <td><input type="text" id="txtTotal.*" style="width:95%;text-align: right;" /></td>
                     <td><input type="text" id="txtTranno.*" style="width:95%;" /> </td>
                 </tr>
             </table>
