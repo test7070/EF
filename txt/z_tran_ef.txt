@@ -1801,13 +1801,15 @@ z_tran_ef08:--z_tran_ef08
 	declare @tmpa table(
 		driverno nvarchar(20),
 		driver nvarchar(40),
-		total2 float
+		total2 float,
+		payed float
 	)
 	
-	insert into @tmpa(driverno,driver,total2)
-	select a.driverno,b.namea,sum(isnull(a.total2,0))
+	insert into @tmpa(driverno,driver,total2,payed)
+	select a.driverno,b.namea,sum(isnull(a.total2,0)),sum(isnull(c.[money],0))
 	from view_transef a
 	left join driver b on a.driverno=b.noa
+	left join view_tres c on a.noa=c.tranno
 	where a.driverno between @t_bdriverno and @t_edriverno
 	and a.datea between @t_bdate and @t_edate
 	and (cast(@t_rank as int)>=6)
@@ -1818,12 +1820,15 @@ z_tran_ef08:--z_tran_ef08
 		driverno nvarchar(20),
 		driver nvarchar(40),
 		plus float,
-		minus float
+		minus float,
+		payed float
 	)
-	insert into @tmpb(driverno,driver,plus,minus)
+	insert into @tmpb(driverno,driver,plus,minus,payed)
 	select a.driverno,b.namea,sum(isnull(a.plusmoney,0)),sum(isnull(a.minusmoney,0))
+	,sum(case when c.noa is not null then isnull(a.plusmoney,0)-isnull(a.minusmoney,0) else 0 end)
 	from carchg a
 	left join driver b on a.driverno=b.noa
+	outer apply(select noa from view_trd where CHARINDEX(a.noa,custchgno)> 0) c
 	where not(ISNULL(plusmoney,0)=0 and ISNULL(minusmoney,0)=0)
 	and driverno between @t_bdriverno and @t_edriverno
 	and datea between @t_bdate and @t_edate
@@ -1842,31 +1847,36 @@ z_tran_ef08:--z_tran_ef08
 		plus float,
 		minus float,
 		
-		totmoney float
+		totmoney float,
+		payed float,
+		unpay float
 	)
-	insert into @tmp(gno,pno,driverno,driver,total)
-	select '1','1',driverno,driver,total2 from @tmpa where total2!=0 order by driverno
+	insert into @tmp(gno,pno,driverno,driver,total,payed)
+	select '1','1',driverno,driver,total2,payed from @tmpa where total2!=0 order by driverno
 	
-	update @tmp set plus=ISNULL(b.plus,0),minus=ISNULL(b.minus,0)
+	update @tmp set plus=ISNULL(b.plus,0),minus=ISNULL(b.minus,0),payed=ISNULL(a.payed,0)+ISNULL(b.payed,0)
 	from @tmp a
 	left join @tmpb b on a.driverno=b.driverno
 	
-	insert into @tmp(gno,pno,driverno,driver,plus,minus)
-	select '1','1',driverno,driver,plus,minus from @tmpb a 
+	insert into @tmp(gno,pno,driverno,driver,plus,minus,payed)
+	select '1','1',driverno,driver,plus,minus,payed from @tmpb a 
 	where not exists(select * from @tmp where driverno=a.driverno)
 	
-	insert into @tmp(gno,pno,total,plus,minus)
-	select '2','2',sum(isnull(total,0)),sum(isnull(plus,0)),sum(isnull(minus,0)) from @tmp
+	insert into @tmp(gno,pno,total,plus,minus,payed)
+	select '2','2',sum(isnull(total,0)),sum(isnull(plus,0)),sum(isnull(minus,0)),sum(isnull(payed,0)) from @tmp
 	
 	update @tmp set totmoney=ISNULL(total,0)+ISNULL(plus,0)-isnull(minus,0)
+	update @tmp set unpay = ISNULL(totmoney,0)-ISNULL(payed,0)
 	
 	select * 
 	,'應付帳款總表（'+@t_bdate+'～'+@t_edate+'）' titlea
 	,ROW_NUMBER()over(order by pno,driverno) a1
 	,driverno a2
 	,driver a3
-	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,total),1)),4,12)) a4
-	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,plus),1)),4,12)) a5
-	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,minus),1)),4,12)) a6
-	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,totmoney),1)),4,12)) a7
+	,dbo.getComma(total,0) a4
+	,dbo.getComma(plus,0) a5
+	,dbo.getComma(minus,0) a6
+	,dbo.getComma(totmoney,0) a7
+	,dbo.getComma(payed,0) a8
+	,dbo.getComma(unpay,0) a9
 	from @tmp order by pno,driverno;
