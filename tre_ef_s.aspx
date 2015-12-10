@@ -41,23 +41,10 @@
 
                 bbmMask = [['txtBdate', r_picd], ['txtEdate', r_picd]];
                 q_mask(bbmMask);
-                q_gt('carteam', '', 0, 0, 0, "");
                 $('#txtBdate').focus();
             }
 
             function q_gtPost(t_name) {
-                switch (t_name) {
-                    case 'carteam':
-                        t_data.carteam = '@全部';
-                        var as = _q_appendData("carteam", "", true);
-                        for ( i = 0; i < as.length; i++) {
-                            t_data.carteam += (t_data.carteam.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].team;
-                        }
-                        break;
-                }
-                if (t_data.carteam.length > 0){
-                    q_cmbParse("cmbCarteam", t_data.carteam);
-                }
             }
 
             function q_seekStr() {
