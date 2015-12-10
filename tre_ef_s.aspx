@@ -55,7 +55,6 @@
                 t_bdate = $('#txtBdate').val();
                 t_edate = $('#txtEdate').val();
                 t_accno = $.trim($('#txtAccno').val());
-                t_carteam = $('#cmbCarteam').val();
 				t_tranno = $.trim($('#txtTranno').val());
 				t_tggno = $.trim($('#txtTggno').val());
 				
@@ -65,8 +64,6 @@
                 + q_sqlPara2("datea", t_bdate, t_edate)
                 + q_sqlPara_or(["accno", "accno2"], t_accno)
                 + q_sqlPara2("tggno", t_tggno) ;
-                if (t_carteam.length > 0)
-                    t_where += q_sqlPara2("carteamno", t_carteam);
                 if (t_driver.length > 0)
                     t_where += " and charindex('" + t_driver + "',driver)>0";     
 				if(t_tranno.length>0)
