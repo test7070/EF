@@ -264,7 +264,7 @@
                 if (q_cur > 0 && q_cur < 4)
                     return;
 
-                q_box('tre_ds_s.aspx', q_name + '_s', "530px", "530px", q_getMsg("popSeek"));
+                q_box('tre_ef_s.aspx', q_name + '_s', "530px", "530px", q_getMsg("popSeek"));
             }
 
             function bbsAssign() {
@@ -303,12 +303,8 @@
             }
 
             function btnPrint() {
-            	if (q_getPara('sys.project') == 'va') {
-					q_box('z_tre_va.aspx' + "?;;;;" + r_accy + ";noa=" + trim($('#txtNoa').val()), '', "95%", "95%", q_getMsg("popPrint"));
-			  	}	
-			  	else{
-                	q_box('z_tre_ds.aspx' + "?;;;;" + r_accy + ";noa=" + trim($('#txtNoa').val()), '', "95%", "95%", q_getMsg("popPrint"));
-               }
+            	q_box('z_tran_ef.aspx' + "?;;;;" + r_accy + ";", '', "95%", "95%", q_getMsg("popPrint"));
+               
             }
 
             function wrServer(key_value) {
