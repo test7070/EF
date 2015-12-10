@@ -1624,22 +1624,25 @@ z_tran_ef07:--z_tran_ef07
 		price2 float,
 		price3 float,
 		total2 float,
-		miles float
+		miles float,
+		payed float
 	)
 	
 	insert into @tmpa(recno,driverno,driver,tranaccy,tranno,trannoq
 		,datea,trandate,straddrno,straddr,endaddrno,endaddr,productno,product
-		,carno,custno,cust,mount2,price2,price3,total2,miles)
-	select ROW_NUMBER()over(partition by driverno order by trandate)
-		,driverno,driver,accy,noa,noq
-		,datea,trandate,straddrno,straddr,endaddrno,endaddr,uccno,product
-		,carno,custno,nick,mount2,price2,price3,total2,miles 
-	from view_transef
-	where driverno between @t_bdriverno and @t_edriverno
-	and datea between @t_bdate and @t_edate
+		,carno,custno,cust,mount2,price2,price3,total2,miles,payed)
+	select ROW_NUMBER()over(partition by a.driverno order by a.trandate)
+		,a.driverno,a.driver,a.accy,a.noa,a.noq
+		,a.datea,a.trandate,a.straddrno,a.straddr,a.endaddrno,a.endaddr,a.uccno,a.product
+		,a.carno,a.custno,a.nick,a.mount2,a.price2,a.price3,a.total2,a.miles
+		,ISNULL(b.[money],0) 
+	from view_transef a
+	left join view_tres b on a.noa=b.tranno
+	where a.driverno between @t_bdriverno and @t_edriverno
+	and isnull(a.datea,'') between @t_bdate and @t_edate
 	and (cast(@t_rank as int)>=6)
-	and (len(@t_carteamno)=0 or CHARINDEX(','+carteamno+',',','+@t_carteamno+',')>0)
-	order by driverno,trandate
+	and (len(@t_carteamno)=0 or CHARINDEX(','+a.carteamno+',',','+@t_carteamno+',')>0)
+	order by a.driverno,a.trandate
 	------------------------------------------------------------------------------------
 	declare @tmpb table(
 		recno int,
@@ -1649,26 +1652,30 @@ z_tran_ef07:--z_tran_ef07
 		carno nvarchar(20),
 		item nvarchar(max),
 		memo nvarchar(max),
-		itemmoney float
+		itemmoney float,
+		payed float
 	)
-	insert into @tmpb(recno,driverno,datea,custchgno,carno,item,memo,itemmoney)
-	select ROW_NUMBER()over(partition by driverno order by datea)
-		,driverno,datea,noa,carno
-		,ISNULL(plusitem,'')+ISNULL(minusitem,''),memo
-		,isnull(plusmoney,0)-isnull(minusmoney,0)
-	from carchg
-	where not(ISNULL(plusmoney,0)=0 and ISNULL(minusmoney,0)=0)
-	and driverno between @t_bdriverno and @t_edriverno
-	and datea between @t_bdate and @t_edate
+	insert into @tmpb(recno,driverno,datea,custchgno,carno,item,memo,itemmoney,payed)
+	select ROW_NUMBER()over(partition by a.driverno order by a.datea)
+		,a.driverno,a.datea,a.noa,a.carno
+		,ISNULL(a.plusitem,'')+ISNULL(a.minusitem,''),a.memo
+		,isnull(a.plusmoney,0)-isnull(a.minusmoney,0)
+		,case when c.noa is not null then isnull(a.plusmoney,0)-isnull(a.minusmoney,0) else 0 end
+	from carchg a
+	outer apply(select noa from view_tre where CHARINDEX(a.noa,carchgno)> 0) c
+	where not(ISNULL(a.plusmoney,0)=0 and ISNULL(a.minusmoney,0)=0)
+	and isnull(a.driverno,'') between @t_bdriverno and @t_edriverno
+	and isnull(a.datea,'') between @t_bdate and @t_edate
 	and (cast(@t_rank as int)>=6)
-	and (len(@t_carteamno)=0 or CHARINDEX(','+carteamno+',',','+@t_carteamno+',')>0)
-	order by driverno,datea
+	and (len(@t_carteamno)=0 or CHARINDEX(','+a.carteamno+',',','+@t_carteamno+',')>0)
+	order by a.driverno,a.datea
 	-----------------------------------------------------------------------------
 	declare @driverno nvarchar(20)
 	declare @n int
 	declare @miles float
 	declare @times float
 	declare @totmoney float
+	declare @payed float
 	
 	declare @tmp table(
 		gno nvarchar(20),
@@ -1701,7 +1708,9 @@ z_tran_ef07:--z_tran_ef07
 		
 		tottimes float,
 		totmiles float,
-		totmoney float
+		totmoney float,
+		payed float,
+		unpay float
 	)
 	
 	declare cursor_table cursor for
@@ -1716,10 +1725,10 @@ z_tran_ef07:--z_tran_ef07
 	begin
 		insert into @tmp(gno,pno,recno,custno,tranaccy,tranno,trannoq,trandate,datea
 			,carno,driverno,driver,straddrno,straddr,endaddrno,endaddr
-			,miles,mount,price,total)
+			,miles,mount,price,total,payed)
 		select '1','1',recno,custno,tranaccy,tranno,trannoq,trandate,datea
 			,carno,driverno,driver,straddrno,straddr,endaddrno,endaddr
-			,miles,mount2,isnull(price2,0)+isnull(price3,0),total2 
+			,miles,mount2,isnull(price2,0)+isnull(price3,0),total2,payed 
 		from @tmpa where driverno=@driverno
 	
 		set @n=0
@@ -1727,16 +1736,17 @@ z_tran_ef07:--z_tran_ef07
 		set @n = ISNULL(@n,0)
 		
 		insert into @tmp(gno,pno,recno,driverno,custchgno,datea,carno
-			,item,memo,itemmoney)
+			,item,memo,itemmoney,payed)
 		select '2','2',recno+@n,driverno,custchgno,datea,carno
-			,item,memo,itemmoney from @tmpb where driverno=@driverno
+			,item,memo,itemmoney,payed from @tmpb where driverno=@driverno
 		
 		select @miles = SUM(ISNULL(miles,0)) from @tmp where pno='1' and driverno=@driverno
 		select @times = SUM(1) from @tmp where pno='1' and driverno=@driverno
 		select @totmoney = SUM(ISNULL(total,0)+ISNULL(itemmoney,0)) from @tmp where (pno='1' or pno='2') and driverno=@driverno
+		select @payed = SUM(ISNULL(payed,0)) from @tmp where pno='1' and driverno=@driverno
 		
-		insert into @tmp(gno,pno,driverno,totmiles,tottimes,totmoney)
-		values('4','4',@driverno,@miles,@times,@totmoney)
+		insert into @tmp(gno,pno,driverno,totmiles,tottimes,totmoney,payed)
+		values('4','4',@driverno,@miles,@times,@totmoney,@payed)
 		
 		fetch next from cursor_table
 		into @driverno
@@ -1767,6 +1777,9 @@ z_tran_ef07:--z_tran_ef07
 	left join cust b on a.custno=b.noa
 	left join driver c on a.driverno=c.noa
 	
+	update @tmp set unpay=ISNULL(total,0)+ISNULL(itemmoney,0)-ISNULL(payed,0) where gno='1' or gno='2'
+	update @tmp set unpay=ISNULL(totmoney,0)-ISNULL(payed,0) where gno='4'
+	
 	select * 
 	,'應付帳款明細表（'+@t_bdate+'～'+@t_edate+'）' titlea
 	,driverno ddno
@@ -1787,6 +1800,8 @@ z_tran_ef07:--z_tran_ef07
 	,tottimes c1
 	,dbo.getComma(totmiles,0) c2
 	,dbo.getComma(totmoney,0) c3
+	,dbo.getComma(payed,0) c4
+	,dbo.getComma(unpay,0) c5
 	from @tmp order by driverno,pno,recno;
 
 z_tran_ef08:--z_tran_ef08	
@@ -1828,7 +1843,7 @@ z_tran_ef08:--z_tran_ef08
 	,sum(case when c.noa is not null then isnull(a.plusmoney,0)-isnull(a.minusmoney,0) else 0 end)
 	from carchg a
 	left join driver b on a.driverno=b.noa
-	outer apply(select noa from view_trd where CHARINDEX(a.noa,custchgno)> 0) c
+	outer apply(select noa from view_tre where CHARINDEX(a.noa,carchgno)> 0) c
 	where not(ISNULL(plusmoney,0)=0 and ISNULL(minusmoney,0)=0)
 	and driverno between @t_bdriverno and @t_edriverno
 	and datea between @t_bdate and @t_edate

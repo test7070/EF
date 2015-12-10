@@ -1,3 +1,23 @@
+transef2tre:--transef2tre
+	SET QUOTED_IDENTIFIER OFF
+	declare @t_noa nvarchar(max)= N[1]
+	declare @t_driverno nvarchar(max)= N[2]
+	declare @t_bdate nvarchar(20) = N[3]
+	declare @t_edate nvarchar(20) = N[4]
+	declare @t_btrandate nvarchar(20)= N[5]
+	declare @t_etrandate nvarchar(20)= N[6]
+	
+	set @t_edate = case when len(ISNULL(@t_edate,''))=0 then CHAR(255) else @t_edate end
+	set @t_etrandate = case when len(ISNULL(@t_etrandate,''))=0 then CHAR(255) else @t_etrandate end
+	
+	select a.*,isnull(a.price2,0)+isnull(a.price3,0) tremoney
+	from view_transef a
+	left join view_tres b on a.noa=b.tranno
+	where a.driverno=@t_driverno
+	and (b.noa is null or b.noa=@t_noa)
+	and isnull(a.datea,'') between @t_bdate and @t_edate
+	and ISNULL(a.trandate,'') between @t_btrandate and @t_etrandate;
+
 transef2trd:--transef2trd
 	SET QUOTED_IDENTIFIER OFF
 	declare @t_noa nvarchar(20)= N[1]

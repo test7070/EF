@@ -95,11 +95,6 @@
                         Unlock(1);
                         return false;
                     }
-                    if ($.trim($('#txtDatea').val()) == 0) {
-                        alert('請輸入' + q_getMsg('lblDatea'));
-                        Unlock(1);
-                        return false;
-                    }
                     var t_noa = $.trim($('#txtNoa').val());
                     var t_custno = $.trim($('#txtCustno').val());
                     var t_bdate = $.trim($('#txtBdate').val());
