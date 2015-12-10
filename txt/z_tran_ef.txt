@@ -1366,16 +1366,16 @@ z_tran_ef05:--z_tran_ef05
 		miles float,
 		payed float
 	)
-	--select top 50 * from view_tres order by noa desc
+
 	insert into @tmpa(recno,custno,cust,nick,accy,noa,noq
 		,datea,trandate,straddrno,straddr,endaddrno,endaddr,productno,product
 		,carno,driverno,driver,total,miles,payed)
 	select ROW_NUMBER()over(partition by a.custno order by a.trandate,a.noa),custno
 		,a.comp,a.nick,a.accy,a.noa,a.noq
 		,a.datea,a.trandate,a.straddrno,a.straddr,a.endaddrno,a.endaddr,a.uccno,a.product
-		,a.carno,a.driverno,a.driver,a.total,a.miles,b.[money]
+		,a.carno,a.driverno,a.driver,a.total,a.miles,b.total
 	from view_transef a
-	left join view_tres b on a.noa=b.tranno
+	left join view_trds b on a.noa=b.tranno
 	where a.custno between @t_bcustno and @t_ecustno
 	and a.datea between @t_bdate and @t_edate
 	order by a.custno,a.trandate,a.noa
@@ -1400,7 +1400,7 @@ z_tran_ef05:--z_tran_ef05
 		,isnull(a.plusmoney,0)-isnull(a.minusmoney,0)
 		,case when c.noa is not null then isnull(a.plusmoney,0)-isnull(a.minusmoney,0) else 0 end
 	from custchg a
-	outer apply(select noa from view_tre where CHARINDEX(a.noa,carchgno)> 0) c
+	outer apply(select noa from view_trd where CHARINDEX(a.noa,custchgno)> 0) c
 	where not(ISNULL(a.plusmoney,0)=0 and ISNULL(a.minusmoney,0)=0)
 	and a.custno between @t_bcustno and @t_ecustno
 	and a.datea between @t_bdate and @t_edate
@@ -1460,6 +1460,8 @@ z_tran_ef05:--z_tran_ef05
 	) a
 	
 	order by isnull(custno,''),gno,recno
+	
+	update @tmp set total = isnull(tranmoney,0)+isnull(itemmoney,0)
 	
 	insert into @tmp(gno,custno,cust,nick,serial
 		,tranmoney,itemmoney,total,payed)
