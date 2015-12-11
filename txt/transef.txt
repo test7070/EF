@@ -92,6 +92,12 @@ transef_copy:--transef_copy
 	select @xdatea=datea from view_transef where noa=@t_noa
 	delete @tmpa where datea =@xdatea
 	----------------------------------------------------
+	declare @number nvarchar(max)
+	declare @string nvarchar(max) = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	declare @nn int
+	declare @mm nvarchar(max)
+	declare @key nvarchar(max)
+	
 	declare cursor_table cursor for
 	select datea from @tmpa
 	open cursor_table
@@ -100,14 +106,17 @@ transef_copy:--transef_copy
 	while(@@FETCH_STATUS <> -1)
 	begin
 		set @maxnoa = ''
-		select top 1 @maxnoa = noa from view_transef where LEFT(noa,9)='BA'+REPLACE(@xdatea,'/','') order by noa desc
+		select top 1 @maxnoa = noa from view_transef where noa like 'BA'+REPLACE(@xdatea,'/','')+'[0-9,A-Z][0-9][0-9]' order by noa desc
 		if len(ISNULL(@maxnoa,''))=0
 		begin
 			set @maxnoa = 'BA'+REPLACE(@xdatea,'/','')+'001'
 		end
 		else
 		begin
-			set @maxnoa = LEFT(@maxnoa,9)+ right('000'+cast(cast(RIGHT(@maxnoa,3) as int)+1 as nvarchar),3)
+			set @number  = right(@maxnoa,3)				
+			set @nn = (charindex(left(@number,1),@string)-1) * 100 + cast(right(@number,2) as int) + 1
+			set @mm = substring(@string,floor(@nn/100)+1,1)
+			set @maxnoa=  'BA'+REPLACE(@xdatea,'/','')+@mm+RIGHT('00'+cast(@nn as nvarchar),2)
 		end
 		if exists(select * from view_transef where noa=@maxnoa)
 		begin
