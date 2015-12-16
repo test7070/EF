@@ -1591,6 +1591,7 @@ z_tran_ef06:--z_tran_ef06
 	from @tmp order by pno,custno;
 	
 z_tran_ef07:--z_tran_ef07
+	SET QUOTED_IDENTIFIER OFF
 	declare @t_rank nvarchar(20) = '[24]'
 	declare @t_user nvarchar(20) = '[1]'	
 	declare @t_bdate nvarchar(20) = case when '#non'=[2] then '' else [2] end
@@ -1728,7 +1729,7 @@ z_tran_ef07:--z_tran_ef07
 			,miles,mount,price,total,payed)
 		select '1','1',recno,custno,tranaccy,tranno,trannoq,trandate,datea
 			,carno,driverno,driver,straddrno,straddr,endaddrno,endaddr
-			,miles,mount2,isnull(price2,0)+isnull(price3,0),total2,payed 
+			,miles,mount2,isnull(price2,0)+isnull(price3,0),isnull(price2,0)+isnull(price3,0),payed 
 		from @tmpa where driverno=@driverno
 	
 		set @n=0
@@ -1781,6 +1782,7 @@ z_tran_ef07:--z_tran_ef07
 	update @tmp set unpay=ISNULL(totmoney,0)-ISNULL(payed,0) where gno='4'
 	
 	select * 
+	,"transef?noa=\'"+tranno+"\' and "+cast(recno as nvarchar)+"=$a1?"+tranaccy ghref
 	,'應付帳款明細表（'+@t_bdate+'～'+@t_edate+'）' titlea
 	,driverno ddno
 	,custno ccno
