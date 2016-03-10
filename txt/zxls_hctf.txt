@@ -155,7 +155,7 @@ zxls_hctf:--zxls_hctf  峻富  全拖&半拖
 					,@commission=cast(replace(@aa,',','') as float)
 					,@commission2=cast(replace(@ab,',','') as float)
 					,@unpack=cast(replace(@ac,',','') as float)
-				
+				--依檔名+序號  判斷是不是相同資料,以便重覆上傳
 				set @key = @filename+RIGHT('00000'+CAST(@recno as nvarchar),5)
 				set @noa = ''
 				select @noa=noa from view_transef where LEFT(memo,len(@key))=@key 
