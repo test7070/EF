@@ -723,8 +723,8 @@
             }
 
             function btnDele() {
-                if (q_chkClose())
-                        return;
+                //if (q_chkClose())
+                 //       return;
                 _btnDele();
             }
 
