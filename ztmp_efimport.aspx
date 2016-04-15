@@ -367,7 +367,7 @@
             }
             .dview {
                 float: left;
-                width: 400px;
+                width: 480px;
                 border-width: 0px;
             }
             .tview {
@@ -483,6 +483,7 @@
                 <table class="tview" id="tview">
                     <tr>
                         <td align="center" style="width:20px; color:black;"><a id='vewChk'> </a></td>
+                        <td align="center" style="width:80px; color:black;"><a id='vewSeq_no'>系統序號</a></td>
                         <td align="center" style="width:100px; color:black;"><a id='vewOrder_date'>訂單日期</a></td>
                         <td align="center" style="width:200px; color:black;"><a id='vewTd_no'>進口單號</a></td>
                         <td align="center" style="width:20px; color:black;"><a id='vewXread'>已讀</a></td>
@@ -490,6 +491,7 @@
                     </tr>
                     <tr>
                         <td><input id="chkBrow.*" type="checkbox" /></td>
+                        <td style="text-align: left;" id='seq_no'>~seq_no</td>
                         <td style="text-align: left;" id='order_date'>~order_date</td>
                         <td style="text-align: left;" id='td_no'>~td_no</td>
                         <td style="text-align: left;" id='xread'>~xread</td>
