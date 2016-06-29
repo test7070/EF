@@ -214,11 +214,11 @@ zxls_hctp:--zxls_hctp  峻富 棧板	 pallet
 			set @cmd = "insert into transef"+@accy+"(noa,noq,carteamno,calctype,datea,timea
 					,po,straddrno,straddr,sender,addressee,atel,endaddrno,endaddr
 					,inmount,pton,aaddr,driverno,driver,trandate,unit,price,price2,price3,memo
-					,worker,custno,comp,nick)
+					,worker,custno,comp,nick,qtime,discount,total,total2)
 			select noa,'001',carteamno,calctype,datea,@curdate
 					,po,straddrno,straddr,sender,addressee,atel,endaddrno,endaddr
 					,inmount,pton,aaddr,driverno,driver,trandate,unit,price,price2,price3,memo
-					,@worker,custno,comp,nick
+					,@worker,custno,comp,nick,@curdate,0,price,0
 			from #z_hctp where accy=@accy and isexist=0"
 			execute sp_executesql @cmd,N'@accy nvarchar(10),@curdate nvarchar(max),@worker nvarchar(max)'
 				,@accy=@accy,@curdate=@curdate,@worker=@worker
@@ -229,7 +229,7 @@ zxls_hctp:--zxls_hctp  峻富 棧板	 pallet
 				,endaddr=b.endaddr,inmount=b.inmount,pton=b.pton,aaddr=b.aaddr,driverno=b.driverno
 				,driver=b.driver,trandate=b.trandate,unit=b.unit,price=b.price,price2=b.price2
 				,price3=b.price3,memo=b.memo,worker2=@worker
-				,custno=b.custno,comp=b.comp,nick=b.nick
+				,custno=b.custno,comp=b.comp,nick=b.nick,total=b.price
 			from transef"+@accy+" a
 			left join #z_hctp b on a.noa=b.noa
 			where b.accy=@accy and b.isexist=1"
