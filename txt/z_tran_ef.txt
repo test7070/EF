@@ -899,6 +899,7 @@ z_tran_ef09:--z_tran_ef09
 	declare @t_carteam  nvarchar(max) = case when '#non'=[17] then '' else [17] end
 	declare @t_calctype  nvarchar(max)= case when '#non'=[18] then '' else [18] end
 	----------------------------------------------------------------------------------------------
+	----------------------------------------------------------------------------------------------
 	--解析要計算的種類
 	declare @string nvarchar(max)
 	declare @n int
@@ -992,23 +993,21 @@ z_tran_ef09:--z_tran_ef09
 	----------------------------------------------------------------------------------------------
 	IF OBJECT_ID('tempdb..#z_tran03')is not null
 	BEGIN
-		set @cmd = 'drop table #z_tran03'
-		EXECUTE sp_executesql @cmd
+		drop table #z_tran03
 	END
 	create table #z_tran03(
-		
 		gno nvarchar(3),
 		trandate nvarchar(10),
 		datea nvarchar(10),
 		custno nvarchar(20),
-		comp nvarchar(40),		
+		comp nvarchar(max),		
 		driverno nvarchar(20),
-		namea nvarchar(20),
+		namea nvarchar(max),
 		carno nvarchar(20),
 		straddrno nvarchar(20),
-		straddr nvarchar(40),
+		straddr nvarchar(max),
 		endaddrno nvarchar(20),
-		endaddr nvarchar(40),
+		endaddr nvarchar(max),
 		product nvarchar(40),
 		inmount float,
 		pton float,
@@ -1102,7 +1101,8 @@ z_tran_ef09:--z_tran_ef09
 	drop table #z_tran03
 	drop table #carkind
 	drop table #calctype
-	drop table #carteam;			
+	drop table #carteam;
+			
 z_tran_ef01:--z_tran_ef01	
 	SET QUOTED_IDENTIFIER OFF
 	declare @cmd nvarchar(max)
