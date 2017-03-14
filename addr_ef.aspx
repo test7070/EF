@@ -135,7 +135,7 @@
 				$('#txtAddr').focus();
 			}
 			function btnPrint() {
-				q_box("z_addrp_ef.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";;" + r_accy, 'z_addr', "95%", "95%", q_getMsg("popPrint"));
+				//q_box("z_addrp_ef.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";;" + r_accy, 'z_addr', "95%", "95%", q_getMsg("popPrint"));
 			}
 			function wrServer(key_value) {
 				var i;
